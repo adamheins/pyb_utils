@@ -9,7 +9,7 @@ git clone https://github.com/adamheins/collision-detection-pybullet
 cd collision-detection-pybullet
 ```
 
-If you have [pipenv](), you can do
+If you have [pipenv](https://pypi.org/project/pipenv/), you can do
 ```bash
 pipenv install
 pipenv run python main.py
