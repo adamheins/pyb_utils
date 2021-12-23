@@ -7,16 +7,24 @@ from collision import NamedCollisionObject, CollisionDetector
 
 
 def load_environment(client_id):
-    """Set up the simulation environment."""
-    pyb.setAdditionalSearchPath(pybullet_data.getDataPath(), physicsClientId=client_id)
+    pyb.setAdditionalSearchPath(
+        pybullet_data.getDataPath(), physicsClientId=client_id
+    )
 
+    # ground plane
     ground_id = pyb.loadURDF(
         "plane.urdf", [0, 0, 0], useFixedBase=True, physicsClientId=client_id
     )
+
+    # KUKA iiwa robot arm
     kuka_id = pyb.loadURDF(
-        "kuka_iiwa/model.urdf", [0, 0, 0], useFixedBase=True, physicsClientId=client_id
+        "kuka_iiwa/model.urdf",
+        [0, 0, 0],
+        useFixedBase=True,
+        physicsClientId=client_id,
     )
 
+    # some cubes for obstacles
     cube1_id = pyb.loadURDF(
         "cube.urdf", [1, 1, 0.5], useFixedBase=True, physicsClientId=client_id
     )
@@ -27,6 +35,7 @@ def load_environment(client_id):
         "cube.urdf", [1, -1, 0.5], useFixedBase=True, physicsClientId=client_id
     )
 
+    # store body indices in a dict with more convenient key names
     bodies = {
         "robot": kuka_id,
         "ground": ground_id,
@@ -55,7 +64,7 @@ def main():
     cube1 = NamedCollisionObject("cube1")
     cube2 = NamedCollisionObject("cube2")
     cube3 = NamedCollisionObject("cube3")
-    link7 = NamedCollisionObject("robot", "lbr_iiwa_link_7")
+    link7 = NamedCollisionObject("robot", "lbr_iiwa_link_7")  # last link
 
     col_detector = CollisionDetector(
         col_id,
