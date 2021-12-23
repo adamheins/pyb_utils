@@ -7,6 +7,7 @@ from collision import NamedCollisionObject, CollisionDetector
 
 
 def load_environment(client_id):
+    """Set up the simulation environment."""
     pyb.setAdditionalSearchPath(pybullet_data.getDataPath(), physicsClientId=client_id)
 
     ground_id = pyb.loadURDF(
@@ -55,24 +56,27 @@ def main():
     cube2 = NamedCollisionObject("cube2")
     cube3 = NamedCollisionObject("cube3")
     link7 = NamedCollisionObject("robot", "lbr_iiwa_link_7")
+
     col_detector = CollisionDetector(
         col_id,
         collision_bodies,
         [(link7, ground), (link7, cube1), (link7, cube2), (link7, cube3)],
     )
 
-    # compute shortest distances for a random configuration
-    q = np.pi * (np.random.random(7) - 0.5)
-    d = col_detector.compute_distances(q, flatten=True)
-    in_col = col_detector.in_collision(q)
-
-    print(f"Configuration = {q}")
-    print(f"Distance to obstacles = {d}")
-    print(f"In collision = {in_col}")
-
-    # the main GUI-based simulation is not affected
     while True:
-        time.sleep(1.0 / 240)
+        # compute shortest distances for a random configuration
+        q = np.pi * (np.random.random(7) - 0.5)
+        d = col_detector.compute_distances(q)
+        in_col = col_detector.in_collision(q)
+
+        print(f"Configuration = {q}")
+        print(f"Distance to obstacles = {d}")
+        print(f"In collision = {in_col}")
+
+        # wait for user to press enter to continue
+        input()
+
+        # the main GUI-based simulation is not affected
         pyb.stepSimulation(physicsClientId=sim_id)
 
 
