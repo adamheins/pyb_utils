@@ -49,13 +49,13 @@ def load_environment(client_id):
 def main():
 
     # main simulation server, with a GUI
-    sim_id = pyb.connect(pyb.GUI)
+    gui_id = pyb.connect(pyb.GUI)
 
     # simulation server only used for collision detection
     col_id = pyb.connect(pyb.DIRECT)
 
     # add bodies to both of the environments
-    bodies = load_environment(sim_id)
+    bodies = load_environment(gui_id)
     collision_bodies = load_environment(col_id)
 
     # define bodies (and links) to use for shortest distance computations and
@@ -85,8 +85,9 @@ def main():
         # wait for user to press enter to continue
         input()
 
-        # the main GUI-based simulation is not affected
-        pyb.stepSimulation(physicsClientId=sim_id)
+        # the main GUI-based simulation is not affected (i.e., the robot
+        # doesn't move)
+        pyb.stepSimulation(physicsClientId=gui_id)
 
 
 if __name__ == "__main__":
