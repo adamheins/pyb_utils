@@ -1,30 +1,31 @@
-# Collision Detection in PyBullet
+# pyb_utils: utilities for PyBullet
 
-Conveniently set up shortest distance computations and collision checking
-between arbitrary objects in arbitrary configurations with PyBullet. See the
-accompanying [blog post](https://adamheins.com/blog/collision-detection-pybullet).
+This is a collection of utilities I've found useful for working with PyBullet,
+including:
+* Collision detection: conveniently set up shortest distance computations and
+  collision checking between arbitrary objects in arbitrary configurations with
+  PyBullet. See the accompanying [blog post](https://adamheins.com/blog/collision-detection-pybullet).
+* Ghost objects: add purely visual objects to the simulation, optionally
+  attached to another body.
 
 ## Install and run
-This code should be run with Python 3.7+.
+This package requires **Python 3.7+**.
 
+### From source
 Clone the repo:
 ```bash
 git clone https://github.com/adamheins/collision-detection-pybullet
 cd collision-detection-pybullet
 ```
 
-If you have [pipenv](https://pypi.org/project/pipenv/), you can do
+Install using [poetry](https://python-poetry.org/):
 ```bash
-pipenv install
-pipenv run python main.py
+poetry install
+poetry run python scripts/run_collision_detection.py  # for example
 ```
 
-Otherwise, do
-```bash
-pip install -r requirements.txt
-python main.py
-```
-where the `pip` and `python` executables are Python 3.7+.
+### Using pip
+TODO
 
 ## License
 MIT
