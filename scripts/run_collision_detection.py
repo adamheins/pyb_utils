@@ -1,9 +1,9 @@
-import time
+#!/usr/bin/env python
 import numpy as np
 import pybullet as pyb
 import pybullet_data
 
-from collision import NamedCollisionObject, CollisionDetector
+from pyb_utils.collision import NamedCollisionObject, CollisionDetector
 
 
 def load_environment(client_id):
