@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+"""Example demonstrating collision detection and shortest distance queries."""
 import numpy as np
 import pybullet as pyb
 import pybullet_data

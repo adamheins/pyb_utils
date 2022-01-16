@@ -59,12 +59,14 @@ class GhostObject:
         # If the object is attached to a parent, then its position and
         # orientation are relative to the parent
         if self.parent_body_uid is not None:
-            parent_position, parent_orientation = pyb.getLinkState(
+            state = pyb.getLinkState(
                 self.parent_body_uid,
                 self.parent_link_index,
                 computeForwardKinematics=True,
             )
-            # TODO numpy stuff
+            parent_position, parent_orientation = state[0], state[1]
+
+            # compute world pose given parent pose and relative pose
             world_position = parent_position + quaternion_rotate(
                 parent_orientation, self.position
             )

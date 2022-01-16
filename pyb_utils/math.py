@@ -13,4 +13,4 @@ def quaternion_multiply(quat1, quat2):
     """Hamilton product of two quaternions stored in xyzw order."""
     C1 = SO3.from_quaternion(quat1, ordering=QUAT_ORDER)
     C2 = SO3.from_quaternion(quat2, ordering=QUAT_ORDER)
-    return C1.dot(C2).to_quaterion(ordering=QUAT_ORDER)
+    return C1.dot(C2).to_quaternion(ordering=QUAT_ORDER)
