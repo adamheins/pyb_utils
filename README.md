@@ -7,6 +7,8 @@ including:
   PyBullet. See the accompanying [blog post](https://adamheins.com/blog/collision-detection-pybullet).
 * Ghost objects: add purely visual objects to the simulation, optionally
   attached to another body.
+* Camera: virtual camera from which to get RGBA, depth, segmentation, and point
+  cloud data.
 
 ## Install and run
 This package requires **Python 3.7+**.
@@ -21,11 +23,13 @@ cd collision-detection-pybullet
 Install using [poetry](https://python-poetry.org/):
 ```bash
 poetry install
-poetry run python scripts/run_collision_detection.py  # for example
+poetry run python scripts/collision_detection_example.py  # for example
 ```
 
 ### Using pip
-TODO
+```
+python -m pip install git+https://github.com/adamheins/pyb_utils
+```
 
 ## License
 MIT
