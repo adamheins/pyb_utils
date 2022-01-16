@@ -104,6 +104,7 @@ class GhostObject:
 
 
 class GhostSphere(GhostObject):
+    """Spherical ghost object."""
     def __init__(
         self,
         radius,

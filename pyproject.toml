@@ -13,6 +13,8 @@ python = ">=3.7,<3.11"
 numpy = "^1.21.5"
 pybullet = "^3.2.1"
 liegroups = {git = "https://github.com/utiasSTARS/liegroups"}
+Pillow = "^9.0.0"
+matplotlib = "^3.5.1"
 
 [tool.poetry.dev-dependencies]
 
