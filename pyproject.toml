@@ -15,6 +15,7 @@ pybullet = "^3.2.1"
 liegroups = {git = "https://github.com/utiasSTARS/liegroups"}
 Pillow = "^9.0.0"
 matplotlib = "^3.5.1"
+opencv-python = "^4.5.5"
 
 [tool.poetry.dev-dependencies]
 
