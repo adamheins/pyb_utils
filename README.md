@@ -31,5 +31,9 @@ poetry run python scripts/collision_detection_example.py  # for example
 python -m pip install git+https://github.com/adamheins/pyb_utils
 ```
 
+## Usage and examples
+You can find example scripts demonstrating all of this package's utilities in
+the `scripts/` directory.
+
 ## License
 MIT
