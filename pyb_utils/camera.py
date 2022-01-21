@@ -2,6 +2,7 @@
 import numpy as np
 import pybullet as pyb
 from PIL import Image
+import cv2
 
 
 class Camera:
@@ -163,3 +164,37 @@ class Camera:
                     r_world_unnormalized[:3] / r_world_unnormalized[3]
                 )
         return points
+
+
+class VideoRecorder:
+    """Recorder for a video of a PyBullet simulation."""
+    def __init__(self, filename, camera, fps, codec="mp4v"):
+        """Initialize the VideoRecorder.
+
+        Parameters:
+            filename: The file to write the video to.
+            camera: Camera object to use for rendering frames.
+            fps: Frames per second. Each `fps` frames will be played over one
+                second of video.
+        """
+        self.camera = camera
+        fourcc = cv2.VideoWriter_fourcc(*codec)
+        self.writer = cv2.VideoWriter(
+            filename,
+            fourcc,
+            fps,
+            (camera.width, camera.height),
+        )
+
+    def capture_frame(self, rgba=None):
+        """Capture a frame and write it to the video.
+
+        Parameters:
+            rgba: If provided, write this data to the video (this can be used
+            to avoid multiple renderings with the camera). Otherwise, get the
+            frame data from the camera.
+        """
+        if not rgba:
+            rgba, _, _ = self.camera.get_frame()
+        bgr = rgba[..., [2, 1, 0]]
+        self.writer.write(bgr)
