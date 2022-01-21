@@ -1,16 +1,26 @@
 #!/usr/bin/env python
-"""Example demonstrating camera utilities."""
+"""Example demonstrating video recording utilities."""
+import time
 import pybullet as pyb
 import pybullet_data
+import numpy as np
 
 from pyb_utils.camera import Camera, VideoRecorder
-from pyb_utils.robot import Robot
+from pyb_utils.robots import Robot
+
+
+DURATION = 5
+DT = 0.01
+FPS = 10
+
+SECONDS_PER_FRAME = 1.0 / FPS
 
 
 def load_environment(client_id):
     pyb.setAdditionalSearchPath(
         pybullet_data.getDataPath(), physicsClientId=client_id
     )
+    pyb.setTimeStep(DT)
 
     # ground plane
     pyb.loadURDF(
@@ -40,11 +50,30 @@ def main():
         width=200,
         height=200,
     )
+    video = VideoRecorder("example.mp4", camera, fps=FPS)
 
-    video = VideoRecorder("test.mp4", camera, fps=10)
+    qd = np.pi * (np.random.random(robot.num_joints) - 0.5)
+    K = np.eye(robot.num_joints)
 
-    for i in range(100):
-        video.capture_frame()
+    t = 0
+    t_frame = 0
+    video.capture_frame()  # capture the initial frame
+    while t <= DURATION:
+        # basic joint space velocity control
+        q, _ = robot.get_joint_states()
+        u = K @ (qd - q)
+        robot.command_velocity(u)
+
+        t += DT
+        t_frame += DT
+
+        # capture a new frame every SECONDS_PER_FRAME seconds
+        if t_frame >= SECONDS_PER_FRAME:
+            video.capture_frame()
+            t_frame = 0
+
+        time.sleep(DT)
+        pyb.stepSimulation()
 
 
 if __name__ == "__main__":

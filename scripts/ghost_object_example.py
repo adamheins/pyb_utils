@@ -13,7 +13,7 @@ import pybullet as pyb
 import pybullet_data
 
 from pyb_utils.ghost import GhostSphere
-from pyb_utils.robot import Robot
+from pyb_utils.robots import Robot
 
 
 DT = 1.0 / 240
