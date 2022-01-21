@@ -52,6 +52,7 @@ def main():
     )
     video = VideoRecorder("example.mp4", camera, fps=FPS)
 
+    # random target configuration
     qd = np.pi * (np.random.random(robot.num_joints) - 0.5)
     K = np.eye(robot.num_joints)
 

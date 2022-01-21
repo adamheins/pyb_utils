@@ -8,7 +8,7 @@ including:
 * Ghost objects: add purely visual objects to the simulation, optionally
   attached to another body.
 * Camera: virtual camera from which to get RGBA, depth, segmentation, and point
-  cloud data.
+  cloud data. Also provides video recording using OpenCV.
 
 ## Install and run
 This package requires **Python 3.7+**.
