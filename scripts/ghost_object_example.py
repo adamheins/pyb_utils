@@ -13,30 +13,10 @@ import pybullet as pyb
 import pybullet_data
 
 from pyb_utils.ghost import GhostSphere
+from pyb_utils.robot import Robot
 
 
 DT = 1.0 / 240
-
-
-class Robot:
-    def __init__(self, uid):
-        self.uid = uid
-        self.num_joints = pyb.getNumJoints(uid)
-        self._joint_indices = list(range(self.num_joints))
-
-    def get_joint_states(self):
-        states = pyb.getJointStates(self.uid, self._joint_indices)
-        q = np.array([state[0] for state in states])
-        v = np.array([state[1] for state in states])
-        return q, v
-
-    def command_velocity(self, u):
-        pyb.setJointMotorControlArray(
-            self.uid,
-            self._joint_indices,
-            controlMode=pyb.VELOCITY_CONTROL,
-            targetVelocities=list(u),
-        )
 
 
 def load_environment(client_id):
