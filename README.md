@@ -26,7 +26,12 @@ poetry install
 poetry run python scripts/collision_detection_example.py  # for example
 ```
 
-### Using pip
+Or using pip:
+```bash
+python -m pip install .
+```
+
+### Directly from GitHub
 ```
 python -m pip install git+https://github.com/adamheins/pyb_utils
 ```
