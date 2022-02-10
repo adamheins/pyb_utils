@@ -64,7 +64,7 @@ class GhostObject:
                 self.parent_link_index,
                 computeForwardKinematics=True,
             )
-            parent_position, parent_orientation = state[0], state[1]
+            parent_position, parent_orientation = state[4], state[5]
 
             # compute world pose given parent pose and relative pose
             world_position = parent_position + quaternion_rotate(
@@ -84,7 +84,7 @@ class GhostObject:
         orientation.
 
         If the object has a parent, then this should be called every time the
-        simulation rendering if updated. The object's pose in the world is
+        simulation rendering is updated. The object's pose in the world is
         updated to reflect the parent's new pose. If position or orientation is
         supplied, then the pose relative to the parent is updated.
 
@@ -109,7 +109,6 @@ class GhostSphere(GhostObject):
         self,
         radius,
         position=None,
-        orientation=None,
         parent_body_uid=None,
         parent_link_index=-1,
         color=(1, 0, 0, 0),
@@ -122,7 +121,6 @@ class GhostSphere(GhostObject):
         super().__init__(
             visual_uid,
             position=position,
-            orientation=orientation,
             parent_body_uid=parent_body_uid,
             parent_link_index=parent_link_index,
         )
