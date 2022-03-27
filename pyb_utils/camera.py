@@ -10,39 +10,103 @@ class Camera:
 
     def __init__(
         self,
-        camera_position,
-        target_position,
+        view_matrix,
         near=0.1,
         far=1000.0,
         fov=60.0,
         width=1280,
         height=720,
     ):
-        """Initialize the camera.
+        self.near = near
+        self.far = far
+        self.width = width
+        self.height = height
+
+        self.view_matrix = view_matrix
+        self.proj_matrix = pyb.computeProjectionMatrixFOV(
+            fov=fov, aspect=width / height, nearVal=near, farVal=far
+        )
+
+    @classmethod
+    def from_camera_position(
+        cls,
+        target_position,
+        camera_position,
+        near=0.1,
+        far=1000.0,
+        fov=60.0,
+        width=1280,
+        height=720,
+    ):
+        """Construct a new camera from target and camera positions.
 
         Parameters:
-            camera_position: The position of the camera in the world
             target_position: The position of the camera's target point
+            camera_position: The position of the camera in the world
             near: Near value
             far: Far value
             fov: Field of view
             width: Width of the image
             height: Height of the image
         """
-        self.position = camera_position
-        self.target = target_position
-        self.near = near
-        self.far = far
-        self.width = width
-        self.height = height
-
-        self.view_matrix = pyb.computeViewMatrix(
+        view_matrix = pyb.computeViewMatrix(
             cameraEyePosition=camera_position,
             cameraTargetPosition=target_position,
             cameraUpVector=[0, 0, 1],
         )
-        self.proj_matrix = pyb.computeProjectionMatrixFOV(
-            fov=fov, aspect=width / height, nearVal=near, farVal=far
+        return cls(
+            view_matrix=view_matrix,
+            near=near,
+            far=far,
+            fov=fov,
+            width=width,
+            height=height,
+        )
+
+    @classmethod
+    def from_distance_rpy(
+        cls,
+        target_position,
+        distance,
+        roll=0,
+        pitch=0,
+        yaw=0,
+        near=0.1,
+        far=1000.0,
+        fov=60.0,
+        width=1280,
+        height=720,
+    ):
+        """Construct a new camera from target position, distance, and roll,
+        pitch, yaw angles.
+
+        Parameters:
+            target_position: The position of the camera's target point
+            distance: Distance of camera from target.
+            roll: Roll of the camera.
+            pitch: Pitch of the camera.
+            yaw: Yaw of the camera.
+            near: Near value
+            far: Far value
+            fov: Field of view
+            width: Width of the image
+            height: Height of the image
+        """
+        view_matrix = pyb.computeViewMatrixFromYawPitchRoll(
+            distance=distance,
+            yaw=yaw,
+            pitch=pitch,
+            roll=roll,
+            cameraTargetPosition=target_position,
+            upAxisIndex=2,
+        )
+        return cls(
+            view_matrix=view_matrix,
+            near=near,
+            far=far,
+            fov=fov,
+            width=width,
+            height=height,
         )
 
     def get_frame(self):
@@ -168,6 +232,7 @@ class Camera:
 
 class VideoRecorder:
     """Recorder for a video of a PyBullet simulation."""
+
     def __init__(self, filename, camera, fps, codec="mp4v"):
         """Initialize the VideoRecorder.
 
