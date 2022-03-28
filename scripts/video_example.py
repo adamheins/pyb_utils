@@ -42,7 +42,7 @@ def main():
     gui_id = pyb.connect(pyb.GUI)
     robot = load_environment(gui_id)
 
-    camera = Camera(
+    camera = Camera.from_camera_position(
         camera_position=(1, 0, 1),
         target_position=(0, 0, 1),
         near=0.1,
