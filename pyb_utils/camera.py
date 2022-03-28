@@ -245,7 +245,7 @@ class VideoRecorder:
         self.camera = camera
         fourcc = cv2.VideoWriter_fourcc(*codec)
         self.writer = cv2.VideoWriter(
-            filename,
+            str(filename),
             fourcc,
             fps,
             (camera.width, camera.height),
@@ -259,7 +259,9 @@ class VideoRecorder:
             to avoid multiple renderings with the camera). Otherwise, get the
             frame data from the camera.
         """
-        if not rgba:
+        if rgba is None:
             rgba, _, _ = self.camera.get_frame()
+
+        # OpenCV uses BGR instead of RGB
         bgr = rgba[..., [2, 1, 0]]
         self.writer.write(bgr)
