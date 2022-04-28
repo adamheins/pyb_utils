@@ -16,8 +16,8 @@ This package requires **Python 3.7+**.
 ### From source
 Clone the repo:
 ```bash
-git clone https://github.com/adamheins/collision-detection-pybullet
-cd collision-detection-pybullet
+git clone https://github.com/adamheins/pyb_utils
+cd pyb_utils
 ```
 
 Install using [poetry](https://python-poetry.org/):
@@ -39,6 +39,13 @@ python -m pip install git+https://github.com/adamheins/pyb_utils
 ## Usage and examples
 You can find example scripts demonstrating all of this package's utilities in
 the `scripts/` directory.
+
+## Known issues
+Feel free to open issues (or better yet, a pull request!) if you find a
+problem. Currently known issues:
+
+* Video recording does not output MP4 videos correctly. The AVI format works,
+  however.
 
 ## License
 MIT
