@@ -11,7 +11,8 @@ including:
   cloud data. Also provides video recording using OpenCV.
 
 ## Install and run
-This package requires **Python 3.7+**.
+This package requires **Python 3.7+**. It has been tested on Ubuntu 16.04,
+18.04, and 20.04.
 
 ### From source
 Clone the repo:
