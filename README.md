@@ -52,6 +52,7 @@ problem. Currently known issues:
 
 * Video recording does not output MP4 videos correctly. The AVI format works,
   however.
+* Ghost objects sometimes flicker (spooky, but undesirable).
 
 ## License
 [MIT](https://github.com/adamheins/pyb_utils/blob/main/LICENSE)
