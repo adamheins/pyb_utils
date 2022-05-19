@@ -39,7 +39,12 @@ python -m pip install git+https://github.com/adamheins/pyb_utils
 
 ## Usage and examples
 You can find example scripts demonstrating all of this package's utilities in
-the `scripts/` directory.
+the `scripts/` directory:
+
+* [collision detection](https://github.com/adamheins/pyb_utils/blob/main/scripts/collision_detection_example.py)
+* [ghost objects](https://github.com/adamheins/pyb_utils/blob/main/scripts/ghost_object_example.py)
+* [camera](https://github.com/adamheins/pyb_utils/blob/main/scripts/camera_example.py)
+* [video](https://github.com/adamheins/pyb_utils/blob/main/scripts/video_example.py)
 
 ## Known issues
 Feel free to open issues (or better yet, a pull request!) if you find a
@@ -49,4 +54,4 @@ problem. Currently known issues:
   however.
 
 ## License
-MIT
+[MIT](https://github.com/adamheins/pyb_utils/blob/main/LICENSE)
