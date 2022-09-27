@@ -68,6 +68,7 @@ def main():
     link7 = NamedCollisionObject("robot", "lbr_iiwa_link_7")  # last link
 
     col_detector = CollisionDetector(
+        gui_id,
         col_id,
         collision_bodies,
         [(link7, ground), (link7, cube1), (link7, cube2), (link7, cube3)],

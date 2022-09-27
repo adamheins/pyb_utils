@@ -70,7 +70,8 @@ def index_collision_pairs(physics_uid, bodies, named_collision_pairs):
 
 
 class CollisionDetector:
-    def __init__(self, col_id, bodies, named_collision_pairs):
+    def __init__(self, gui_id, col_id, bodies, named_collision_pairs):
+        self.gui_id = gui_id
         self.col_id = col_id
         self.robot_id = bodies["robot"]
         self.indexed_collision_pairs = index_collision_pairs(
@@ -93,6 +94,7 @@ class CollisionDetector:
         # put the robot in the given configuration
         for i in range(pyb.getNumJoints(self.robot_id, physicsClientId=self.col_id)):
             pyb.resetJointState(self.robot_id, i, q[i], physicsClientId=self.col_id)
+            pyb.resetJointState(self.robot_id, i, q[i], physicsClientId=self.gui_id)
 
         # compute shortest distances between all object pairs
         distances = []
