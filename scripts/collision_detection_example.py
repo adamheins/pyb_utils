@@ -47,6 +47,71 @@ def load_environment(client_id):
     return bodies
 
 
+def create_robot_debug_params(gui_id, robot_id):
+    params = dict()
+
+    for joint_idx in range(pyb.getNumJoints(robot_id, physicsClientId=gui_id)):
+        joint_name = pyb.getJointInfo(robot_id, joint_idx)[1].decode("ascii")
+        params[joint_name] = pyb.addUserDebugParameter(
+            joint_name,
+            rangeMin=-2 * np.pi,
+            rangeMax=2 * np.pi,
+            startValue=0,
+            physicsClientId=gui_id,
+        )
+
+    return params
+
+
+def read_robot_state(robot_id, robot_params, physicsClientId):
+    state = np.array(
+        [
+            pyb.readUserDebugParameter(
+                robot_params["lbr_iiwa_joint_1"],
+                physicsClientId=physicsClientId,
+            ),
+            pyb.readUserDebugParameter(
+                robot_params["lbr_iiwa_joint_2"],
+                physicsClientId=physicsClientId,
+            ),
+            pyb.readUserDebugParameter(
+                robot_params["lbr_iiwa_joint_3"],
+                physicsClientId=physicsClientId,
+            ),
+            pyb.readUserDebugParameter(
+                robot_params["lbr_iiwa_joint_4"],
+                physicsClientId=physicsClientId,
+            ),
+            pyb.readUserDebugParameter(
+                robot_params["lbr_iiwa_joint_5"],
+                physicsClientId=physicsClientId,
+            ),
+            pyb.readUserDebugParameter(
+                robot_params["lbr_iiwa_joint_6"],
+                physicsClientId=physicsClientId,
+            ),
+            pyb.readUserDebugParameter(
+                robot_params["lbr_iiwa_joint_7"],
+                physicsClientId=physicsClientId,
+            ),
+        ]
+    )
+
+    return state
+
+
+def update_robot_state(robot_id, state, physicsClientId):
+    for joint_idx in range(
+        pyb.getNumJoints(robot_id, physicsClientId=physicsClientId)
+    ):
+        pyb.resetJointState(
+            robot_id,
+            joint_idx,
+            state[joint_idx],
+            physicsClientId=physicsClientId,
+        )
+
+
 def main():
 
     # main simulation server, with a GUI
@@ -58,6 +123,18 @@ def main():
     # add bodies to both of the environments
     bodies = load_environment(gui_id)
     collision_bodies = load_environment(col_id)
+
+    robot_id = bodies["robot"]
+
+    # create user debug parameters
+    collision_margin_param = pyb.addUserDebugParameter(
+        "collision_margin",
+        rangeMin=0,
+        rangeMax=0.2,
+        startValue=0.01,
+        physicsClientId=gui_id,
+    )
+    robot_params = create_robot_debug_params(gui_id, robot_id)
 
     # define bodies (and links) to use for shortest distance computations and
     # collision checking
@@ -75,19 +152,26 @@ def main():
 
     while True:
         # compute shortest distances for a random configuration
-        q = np.pi * (np.random.random(7) - 0.5)
-        d = col_detector.compute_distances(q)
-        in_col = col_detector.in_collision(q)
+        state = read_robot_state(robot_id, robot_params, gui_id)
 
-        print(f"Configuration = {q}")
+        d = col_detector.compute_distances(state)
+        in_col = col_detector.in_collision(
+            state, margin=pyb.readUserDebugParameter(collision_margin_param)
+        )
+
+        if not in_col:
+            update_robot_state(robot_id, state, physicsClientId=gui_id)
+        else:
+            pyb.addUserDebugText(
+                "Avoiding collision",
+                textPosition=[0, 0, 1.5],
+                textColorRGB=[1, 0, 0],
+                textSize=2,
+                lifeTime=0.2,
+            )
+
         print(f"Distance to obstacles = {d}")
-        print(f"In collision = {in_col}")
 
-        # wait for user to press enter to continue
-        input()
-
-        # the main GUI-based simulation is not affected (i.e., the robot
-        # doesn't move)
         pyb.stepSimulation(physicsClientId=gui_id)
 
 
