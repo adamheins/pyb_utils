@@ -4,6 +4,7 @@ import pybullet as pyb
 
 class Robot:
     """Wrapper for a PyBullet robot."""
+
     def __init__(self, uid):
         """Initialize using the uid of the robot."""
         self.uid = uid

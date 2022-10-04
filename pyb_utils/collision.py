@@ -91,8 +91,12 @@ class CollisionDetector:
         """
 
         # put the robot in the given configuration
-        for i in range(pyb.getNumJoints(self.robot_id, physicsClientId=self.col_id)):
-            pyb.resetJointState(self.robot_id, i, q[i], physicsClientId=self.col_id)
+        for i in range(
+            pyb.getNumJoints(self.robot_id, physicsClientId=self.col_id)
+        ):
+            pyb.resetJointState(
+                self.robot_id, i, q[i], physicsClientId=self.col_id
+            )
 
         # compute shortest distances between all object pairs
         distances = []
