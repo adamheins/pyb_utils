@@ -46,22 +46,6 @@ def load_environment(client_id):
     }
     return bodies
 
-def create_user_debug_params(gui_id):
-    return {
-        'collision_margin': pyb.addUserDebugParameter('collision_margin', 0, 0.2, 0.01, physicsClientId=gui_id),
-        'lbr_iiwa_joint1': pyb.addUserDebugParameter('lbr_iiwa_joint1', -2*np.pi, 2*np.pi, 0, physicsClientId=gui_id),
-        'lbr_iiwa_joint2': pyb.addUserDebugParameter('lbr_iiwa_joint2', -2*np.pi, 2*np.pi, 0, physicsClientId=gui_id),
-        'lbr_iiwa_joint3': pyb.addUserDebugParameter('lbr_iiwa_joint3', -2*np.pi, 2*np.pi, 0, physicsClientId=gui_id),
-        'lbr_iiwa_joint4': pyb.addUserDebugParameter('lbr_iiwa_joint4', -2*np.pi, 2*np.pi, 0, physicsClientId=gui_id),
-        'lbr_iiwa_joint5': pyb.addUserDebugParameter('lbr_iiwa_joint5', -2*np.pi, 2*np.pi, 0, physicsClientId=gui_id),
-        'lbr_iiwa_joint6': pyb.addUserDebugParameter('lbr_iiwa_joint6', -2*np.pi, 2*np.pi, 0, physicsClientId=gui_id),
-        'lbr_iiwa_joint7': pyb.addUserDebugParameter('lbr_iiwa_joint7', -2*np.pi, 2*np.pi, 0, physicsClientId=gui_id)
-    }
-
-def update_robot_state(robot_id, state, physicsClientId):
-    for joint_idx in range(pyb.getNumJoints(robot_id, physicsClientId=physicsClientId)):
-        pyb.resetJointState(robot_id, joint_idx, state[joint_idx], physicsClientId=physicsClientId)
-
 def create_robot_debug_params(gui_id, robot_id):
     params = dict()
 
@@ -76,7 +60,6 @@ def create_robot_debug_params(gui_id, robot_id):
         )
 
     return params
-
 
 def read_robot_state(robot_id, robot_params, physicsClientId):
     state = np.array(
@@ -135,9 +118,6 @@ def main():
     # simulation server only used for collision detection
     col_id = pyb.connect(pyb.DIRECT)
 
-    # create user debug parameters
-    user_params = create_user_debug_params(gui_id)
-
     # add bodies to both of the environments
     bodies = load_environment(gui_id)
     collision_bodies = load_environment(col_id)
@@ -172,7 +152,6 @@ def main():
 
     while True:
         # compute shortest distances for a random configuration
-<<<<<<< HEAD
         state = read_robot_state(robot_id, robot_params, gui_id)
 
         d = col_detector.compute_distances(state)
@@ -182,36 +161,13 @@ def main():
 
         if not in_col:
             update_robot_state(robot_id, state, physicsClientId=gui_id)
-=======
-        q = np.array([
-            pyb.readUserDebugParameter(user_params["lbr_iiwa_joint1"]),
-            pyb.readUserDebugParameter(user_params["lbr_iiwa_joint2"]),
-            pyb.readUserDebugParameter(user_params["lbr_iiwa_joint3"]),
-            pyb.readUserDebugParameter(user_params["lbr_iiwa_joint4"]),
-            pyb.readUserDebugParameter(user_params["lbr_iiwa_joint5"]),
-            pyb.readUserDebugParameter(user_params["lbr_iiwa_joint6"]),
-            pyb.readUserDebugParameter(user_params["lbr_iiwa_joint7"])
-        ])
-        
-        d = col_detector.compute_distances(q)
-        in_col = col_detector.in_collision(
-            q, 
-            margin=pyb.readUserDebugParameter(user_params["collision_margin"]))
-
-        if not in_col:
-            update_robot_state(robot_id, q, physicsClientId=gui_id)
->>>>>>> 4160cbbaabeef3b169ebfdc3d6d36177c622ac7d
         else:
             pyb.addUserDebugText(
                 "Avoiding collision",
                 textPosition=[0, 0, 1.5],
                 textColorRGB=[1, 0, 0],
                 textSize=2,
-<<<<<<< HEAD
                 lifeTime=0.2,
-=======
-                lifeTime=0.2
->>>>>>> 4160cbbaabeef3b169ebfdc3d6d36177c622ac7d
             )
 
         print(f"Distance to obstacles = {d}")
