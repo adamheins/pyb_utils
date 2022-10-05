@@ -11,6 +11,7 @@ class GhostObject:
     to that body, or it can be positioned at an absolute location in the world
     frame.
     """
+
     def __init__(
         self,
         visual_uid,
@@ -105,6 +106,7 @@ class GhostObject:
 
 class GhostSphere(GhostObject):
     """Spherical ghost object."""
+
     def __init__(
         self,
         radius,
