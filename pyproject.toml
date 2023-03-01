@@ -4,7 +4,7 @@ line-length = 80
 [tool.poetry]
 name = "pyb_utils"
 version = "0.2.1"
-description = ""
+description = "Basic utilities for PyBullet, including collision detection, ghost (i.e. visual-only) objects, and cameras."
 authors = ["Adam Heins <mail@adamheins.com>"]
 license = "MIT"
 
