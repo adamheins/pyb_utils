@@ -14,6 +14,11 @@ including:
 This package requires **Python 3.7+**. It has been tested on Ubuntu 16.04,
 18.04, and 20.04.
 
+### From pip
+```
+pip install pyb_utils
+```
+
 ### From source
 Clone the repo:
 ```bash
@@ -30,11 +35,6 @@ poetry run python scripts/collision_detection_example.py  # for example
 Or using pip:
 ```bash
 python -m pip install .
-```
-
-### Directly from GitHub
-```
-python -m pip install git+https://github.com/adamheins/pyb_utils
 ```
 
 ## Usage and examples
