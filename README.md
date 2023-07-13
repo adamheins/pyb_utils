@@ -38,6 +38,27 @@ python -m pip install .
 ```
 
 ## Usage and examples
+This package provides a few basic quality of life utilities. First, PyBullet
+represents rotations using quaternions (in `[x, y, z, w]` order). We provide a
+few helper routines to convert to rotation matrices and rotate points (using
+[spatialmath](https://github.com/bdaiinstitute/spatialmath-python) under the
+hood):
+```python
+>>> from pyb_utils.math import *
+>>> q = (0, 0, np.sqrt(2) / 2, np.sqrt(2) / 2)  # 90 deg rotation about z-axis
+
+>>> quaternion_to_matrix(q)  # convert to rotation matrix
+array([[ 1.,  0.,  0.],
+       [ 0., -0., -1.],
+       [ 0.,  1., -0.]])
+
+>>> quaternion_multiply(q, q)  # rotate two quaternions together
+array([0, 0, -1, 0])           # 180 deg rotate about z
+
+>>> quaternion_rotate(q, [1, 0, 0])  # rotate a point
+array([0, 1, 0])
+```
+
 You can find example scripts demonstrating all of this package's utilities in
 the `scripts/` directory:
 
