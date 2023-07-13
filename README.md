@@ -59,8 +59,59 @@ array([0, 0, -1, 0])           # 180 deg rotate about z
 array([0, 1, 0])
 ```
 
-You can find example scripts demonstrating all of this package's utilities in
-the `scripts/` directory:
+Second, we provide a simple class to quickly create rigid bodies
+programmatically, which is useful for adding basic objects to manipulate or act
+as obstacles:
+```python
+>>> import pybullet as pyb
+>>> from pyb_utils.bodies import BulletBody
+
+>>> pyb.connect(pyb.GUI)
+
+# create a 1x1x1 cube at the origin
+>>> box = BulletBody.box(position=[0, 0, 0], half_extents=[0.5, 0.5, 0.5])
+
+# put a ball on top
+>>> ball = BulletBody.sphere(position=[0, 0, 1.5], radius=0.5)
+
+# now put it somewhere else
+ball.set_pose(position=[2, 0, 0.5])
+```
+
+Third, we wrap some PyBullet functions to return **named** tuples, rather than
+normal tuples. When the tuples have 10+ fields in them, it is rather helpful to
+have names! The names and parameters of these functions are exactly the same as
+the underlying PyBullet ones, to make swapping effortless. Continuing our
+previous example:
+```python
+# built-in PyBullet method
+# the output is not easy to read!
+>>> pyb.getDynamicsInfo(box.uid, -1)
+(1.0,
+ 0.5,
+ (0.16666666666666666, 0.16666666666666666, 0.16666666666666666),
+ (0.0, 0.0, 0.0),
+ (0.0, 0.0, 0.0, 1.0),
+ 0.0,
+ 0.0,
+ 0.0,
+ -1.0,
+ -1.0,
+ 2,
+ 0.001)
+
+# switch to the pyb_utils version
+# now we can access fields by name
+>>> from pyb_utils.named_tuples import getDynamicsInfo
+>>> info = getDynamicsInfo(box.uid, -1)
+>>> info.mass
+1.0
+>>> info.localInertiaPos
+(0.0, 0.0, 0.0)
+```
+
+And there's more! You can find example scripts of all of this package's
+utilities in the `scripts/` directory:
 
 * [collision detection](https://github.com/adamheins/pyb_utils/blob/main/scripts/collision_detection_example.py)
 * [ghost objects](https://github.com/adamheins/pyb_utils/blob/main/scripts/ghost_object_example.py)
