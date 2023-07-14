@@ -10,7 +10,7 @@ including:
 * Camera: virtual camera from which to get RGBA, depth, segmentation, and point
   cloud data. Also provides video recording using OpenCV.
 * Convenience class for easily creating rigid bodies.
-* Versions of some PyBullet functions that returned *named* tuples, for easy
+* Versions of some PyBullet functions that return *named* tuples, for easy
   field access.
 * Basic quaternion functions.
 
