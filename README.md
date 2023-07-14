@@ -29,7 +29,7 @@ cd pyb_utils
 Install using [poetry](https://python-poetry.org/):
 ```bash
 poetry install
-poetry run python scripts/collision_detection_example.py  # for example
+poetry run python examples/collision_detection_example.py  # for example
 ```
 
 Or using pip:
@@ -44,18 +44,18 @@ few helper routines to convert to rotation matrices and rotate points (using
 [spatialmath](https://github.com/bdaiinstitute/spatialmath-python) under the
 hood):
 ```python
->>> from pyb_utils.math import *
+>>> import pyb_utils
 >>> q = (0, 0, np.sqrt(2) / 2, np.sqrt(2) / 2)  # 90 deg rotation about z-axis
 
->>> quaternion_to_matrix(q)  # convert to rotation matrix
+>>> pyb_utils.quaternion_to_matrix(q)  # convert to rotation matrix
 array([[ 1.,  0.,  0.],
        [ 0., -0., -1.],
        [ 0.,  1., -0.]])
 
->>> quaternion_multiply(q, q)  # rotate two quaternions together
-array([0, 0, -1, 0])           # 180 deg rotate about z
+>>> pyb_utils.quaternion_multiply(q, q)  # rotate two quaternions together
+array([0, 0, -1, 0])                     # 180 deg rotate about z
 
->>> quaternion_rotate(q, [1, 0, 0])  # rotate a point
+>>> pyb_utils.quaternion_rotate(q, [1, 0, 0])  # rotate a point
 array([0, 1, 0])
 ```
 
@@ -64,15 +64,15 @@ programmatically, which is useful for adding basic objects to manipulate or act
 as obstacles:
 ```python
 >>> import pybullet as pyb
->>> from pyb_utils.bodies import BulletBody
+>>> import pyb_utils
 
 >>> pyb.connect(pyb.GUI)
 
 # create a 1x1x1 cube at the origin
->>> box = BulletBody.box(position=[0, 0, 0], half_extents=[0.5, 0.5, 0.5])
+>>> box = pyb_utils.BulletBody.box(position=[0, 0, 0], half_extents=[0.5, 0.5, 0.5])
 
 # put a ball on top
->>> ball = BulletBody.sphere(position=[0, 0, 1.5], radius=0.5)
+>>> ball = pyb_utils.BulletBody.sphere(position=[0, 0, 1.5], radius=0.5)
 
 # now put it somewhere else
 ball.set_pose(position=[2, 0, 0.5])
@@ -102,8 +102,7 @@ previous example:
 
 # switch to the pyb_utils version
 # now we can access fields by name
->>> from pyb_utils.named_tuples import getDynamicsInfo
->>> info = getDynamicsInfo(box.uid, -1)
+>>> info = pyb_utils.getDynamicsInfo(box.uid, -1)
 >>> info.mass
 1.0
 >>> info.localInertiaPos
@@ -111,12 +110,14 @@ previous example:
 ```
 
 And there's more! You can find example scripts of all of this package's
-utilities in the `scripts/` directory:
+utilities in the `examples/` directory:
 
-* [collision detection](https://github.com/adamheins/pyb_utils/blob/main/scripts/collision_detection_example.py)
-* [ghost objects](https://github.com/adamheins/pyb_utils/blob/main/scripts/ghost_object_example.py)
-* [camera](https://github.com/adamheins/pyb_utils/blob/main/scripts/camera_example.py)
-* [video](https://github.com/adamheins/pyb_utils/blob/main/scripts/video_example.py)
+* [rigid bodies](examples/bodies_example.py)
+* [camera](examples/camera_example.py)
+* [collision detection](examples/collision_detection_example.py)
+* [ghost objects](examples/ghost_object_example.py)
+* [named tuples](examples/named_tuples_example.py)
+* [video](examples/video_example.py)
 
 ## Known issues
 Feel free to open issues (or better yet, a pull request!) if you find a
