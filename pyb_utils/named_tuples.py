@@ -1,9 +1,14 @@
+"""Wrappers for PyBullet methods that return large tuples.
+
+This submodule returns the same info in a named tuple, so the fields can be
+easily identified.
+"""
 from collections import namedtuple
 
 import pybullet as pyb
 
 
-# field names are camel case to match bullet convention
+# field names are camel case to match PyBullet convention
 DynamicsInfo = namedtuple(
     "DynamicsInfo",
     [
@@ -42,6 +47,27 @@ ContactPoint = namedtuple(
     ],
 )
 
+ConstraintInfo = namedtuple(
+    "ConstraintInfo",
+    [
+        "parentBodyUniqueId",
+        "parentJointIndex",
+        "childBodyUniqueId",
+        "childLinkIndex",
+        "constraintType",
+        "jointAxis",
+        "jointPivotInParent",
+        "jointPivotInChild",
+        "jointFrameOrientationParent",
+        "jointFrameOrientationChild",
+        "maxAppliedForce",
+        "gearRatio",
+        "gearAuxLink",
+        "relativePositionTarget",
+        "erp",
+    ],
+)
+
 
 def getDynamicsInfo(bodyUniqueId, linkIndex, physicsClientId=0):
     return DynamicsInfo(
@@ -65,3 +91,9 @@ def getClosestPoints(
         bodyA, bodyB, distance, linkIndexA, linkIndexB, physicsClientId
     )
     return [ContactPoint(*point) for point in points_raw]
+
+
+def getConstraintInfo(constraintUniqueId, physicsClientId=0):
+    return ConstraintInfo(
+        *pyb.getConstraintInfo(constraintUniqueId, physicsClientId)
+    )

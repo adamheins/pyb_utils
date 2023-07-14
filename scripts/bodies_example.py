@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+"""Example demonstrating the use of the BulletBody convenience class to create
+rigid bodies."""
 import time
 
 import pybullet as pyb
