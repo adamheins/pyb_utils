@@ -9,6 +9,10 @@ including:
   attached to another body.
 * Camera: virtual camera from which to get RGBA, depth, segmentation, and point
   cloud data. Also provides video recording using OpenCV.
+* Convenience class for easily creating rigid bodies.
+* Versions of some PyBullet functions that returned *named* tuples, for easy
+  field access.
+* Basic quaternion functions.
 
 ## Install and run
 This package requires **Python 3.7+**. It has been tested on Ubuntu 16.04,
@@ -78,7 +82,7 @@ as obstacles:
 ball.set_pose(position=[2, 0, 0.5])
 ```
 
-Third, we wrap some PyBullet functions to return **named** tuples, rather than
+Third, we wrap some PyBullet functions to return *named* tuples, rather than
 normal tuples. When the tuples have 10+ fields in them, it is rather helpful to
 have names! The names and parameters of these functions are exactly the same as
 the underlying PyBullet ones, to make swapping effortless. Continuing our
