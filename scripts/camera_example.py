@@ -5,7 +5,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import pybullet as pyb
 import pybullet_data
 
-from pyb_utils.camera import Camera
+import pyb_utils
 
 
 def load_environment(client_id):
@@ -37,7 +37,7 @@ def main():
     gui_id = pyb.connect(pyb.GUI)
     bodies = load_environment(gui_id)
 
-    camera = Camera.from_camera_position(
+    camera = pyb_utils.Camera.from_camera_position(
         camera_position=(1, 0, 1),
         target_position=(0, 0, 1),
         near=0.1,

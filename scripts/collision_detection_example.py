@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 """Example demonstrating collision detection and shortest distance queries."""
 import time
+
 import numpy as np
 import pybullet as pyb
 import pybullet_data
 
-from pyb_utils.collision import NamedCollisionObject, CollisionDetector
+import pyb_utils
 
 
 TIMESTEP = 1.0 / 60
@@ -113,13 +114,13 @@ def main():
 
     # define bodies (and links) to use for shortest distance computations and
     # collision checking
-    ground = NamedCollisionObject("ground")
-    cube1 = NamedCollisionObject("cube1")
-    cube2 = NamedCollisionObject("cube2")
-    cube3 = NamedCollisionObject("cube3")
-    link7 = NamedCollisionObject("robot", "lbr_iiwa_link_7")  # last link
+    ground = pyb_utils.NamedCollisionObject("ground")
+    cube1 = pyb_utils.NamedCollisionObject("cube1")
+    cube2 = pyb_utils.NamedCollisionObject("cube2")
+    cube3 = pyb_utils.NamedCollisionObject("cube3")
+    link7 = pyb_utils.NamedCollisionObject("robot", "lbr_iiwa_link_7")  # last link
 
-    col_detector = CollisionDetector(
+    col_detector = pyb_utils.CollisionDetector(
         col_id,
         collision_bodies,
         [(link7, ground), (link7, cube1), (link7, cube2), (link7, cube3)],

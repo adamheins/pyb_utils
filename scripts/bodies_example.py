@@ -6,7 +6,7 @@ import time
 import pybullet as pyb
 import pybullet_data
 
-from pyb_utils.bodies import BulletBody
+import pyb_utils
 
 
 STEPS_PER_SEC = 60
@@ -21,12 +21,14 @@ def main():
     pyb.loadURDF("plane.urdf", [0, 0, 0], useFixedBase=True)
 
     # create some objects
-    box = BulletBody.box([0, 0, 0.5], half_extents=[0.5, 0.5, 0.5])
-    ball = BulletBody.sphere([0, 0, 1.5], radius=0.5, color=(0, 1, 0, 1))
-    cylinder = BulletBody.cylinder(
+    box = pyb_utils.BulletBody.box([0, 0, 0.5], half_extents=[0.5, 0.5, 0.5])
+    ball = pyb_utils.BulletBody.sphere(
+        [0, 0, 1.5], radius=0.5, color=(0, 1, 0, 1)
+    )
+    cylinder = pyb_utils.BulletBody.cylinder(
         [0, 1, 1], radius=0.5, height=2, color=(0, 0, 1, 1)
     )
-    cap = BulletBody.capsule(
+    cap = pyb_utils.BulletBody.capsule(
         [0, 0, 3],
         orientation=(0.707, 0, 0, 0.707),
         radius=0.25,

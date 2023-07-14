@@ -5,18 +5,16 @@ These objects are purely visual objects that can be added to PyBullet (i.e.,
 they don't influence the simulated physics at all). These could be used to
 visualize volumes like collision spheres programmatically, for example.
 """
-
 import time
 
 import numpy as np
 import pybullet as pyb
 import pybullet_data
 
-from pyb_utils.ghost import GhostSphere
-from pyb_utils.robots import Robot
+import pyb_utils
 
 
-DT = 1.0 / 240
+TIMESTEP = 1.0 / 240
 
 
 def load_environment(client_id):
@@ -37,7 +35,7 @@ def load_environment(client_id):
         physicsClientId=client_id,
     )
 
-    return Robot(kuka_id)
+    return pyb_utils.Robot(kuka_id)
 
 
 def main():
@@ -49,7 +47,7 @@ def main():
     K = np.eye(robot.num_joints)
 
     # fixed sphere above the robot
-    ghost_fixed = GhostSphere(
+    ghost_fixed = pyb_utils.GhostObject.sphere(
         radius=0.1, color=(0, 1, 0, 0.5), position=(0, 0, 2)
     )
 

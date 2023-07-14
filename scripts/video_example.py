@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 """Example demonstrating video recording utilities."""
 import time
+
+import numpy as np
 import pybullet as pyb
 import pybullet_data
-import numpy as np
 
-from pyb_utils.camera import Camera, VideoRecorder
-from pyb_utils.robots import Robot
+import pyb_utils
 
 
 DURATION = 5
-DT = 0.01
+TIMESTEP = 0.01
 FPS = 10
 
 SECONDS_PER_FRAME = 1.0 / FPS
@@ -20,7 +20,7 @@ def load_environment(client_id):
     pyb.setAdditionalSearchPath(
         pybullet_data.getDataPath(), physicsClientId=client_id
     )
-    pyb.setTimeStep(DT)
+    pyb.setTimeStep(TIMESTEP)
 
     # ground plane
     pyb.loadURDF(
@@ -35,14 +35,14 @@ def load_environment(client_id):
         physicsClientId=client_id,
     )
 
-    return Robot(kuka_id)
+    return pyb_utils.Robot(kuka_id)
 
 
 def main():
     gui_id = pyb.connect(pyb.GUI)
     robot = load_environment(gui_id)
 
-    camera = Camera.from_camera_position(
+    camera = pyb_utils.Camera.from_camera_position(
         camera_position=(1, 0, 1),
         target_position=(0, 0, 1),
         near=0.1,
@@ -50,7 +50,7 @@ def main():
         width=200,
         height=200,
     )
-    video = VideoRecorder("example.mp4", camera, fps=FPS)
+    video = pyb_utils.VideoRecorder("example.mp4", camera, fps=FPS)
 
     # random target configuration
     qd = np.pi * (np.random.random(robot.num_joints) - 0.5)
@@ -65,15 +65,15 @@ def main():
         u = K @ (qd - q)
         robot.command_velocity(u)
 
-        t += DT
-        t_frame += DT
+        t += TIMESTEP
+        t_frame += TIMESTEP
 
         # capture a new frame every SECONDS_PER_FRAME seconds
         if t_frame >= SECONDS_PER_FRAME:
             video.capture_frame()
             t_frame = 0
 
-        time.sleep(DT)
+        time.sleep(TIMESTEP)
         pyb.stepSimulation()
 
 

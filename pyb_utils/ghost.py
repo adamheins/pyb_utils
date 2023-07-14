@@ -1,7 +1,7 @@
 import numpy as np
 import pybullet as pyb
 
-from pyb_utils.math import quaternion_rotate, quaternion_multiply
+from .math import quaternion_rotate, quaternion_multiply
 
 
 class GhostObject:
@@ -56,6 +56,28 @@ class GhostObject:
             baseOrientation=list(world_orientation),
         )
 
+    @classmethod
+    def sphere(
+        cls,
+        radius,
+        position=None,
+        parent_body_uid=None,
+        parent_link_index=-1,
+        color=(1, 0, 0, 0),
+    ):
+        """Spherical ghost object."""
+        visual_uid = pyb.createVisualShape(
+            shapeType=pyb.GEOM_SPHERE,
+            radius=radius,
+            rgbaColor=color,
+        )
+        return cls(
+            visual_uid,
+            position=position,
+            parent_body_uid=parent_body_uid,
+            parent_link_index=parent_link_index,
+        )
+
     def _compute_world_position(self):
         # If the object is attached to a parent, then its position and
         # orientation are relative to the parent
@@ -104,25 +126,8 @@ class GhostObject:
         )
 
 
-class GhostSphere(GhostObject):
-    """Spherical ghost object."""
+def GhostSphere(*args, **kwargs):
+    import logging
 
-    def __init__(
-        self,
-        radius,
-        position=None,
-        parent_body_uid=None,
-        parent_link_index=-1,
-        color=(1, 0, 0, 0),
-    ):
-        visual_uid = pyb.createVisualShape(
-            shapeType=pyb.GEOM_SPHERE,
-            radius=radius,
-            rgbaColor=color,
-        )
-        super().__init__(
-            visual_uid,
-            position=position,
-            parent_body_uid=parent_body_uid,
-            parent_link_index=parent_link_index,
-        )
+    logging.warning("GhostSphere is deprecated. Use GhostObject.sphere instead.")
+    return GhostObject.sphere(*args, **kwargs)
