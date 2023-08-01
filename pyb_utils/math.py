@@ -16,7 +16,6 @@ def matrix_to_quaternion(C):
 
 def quaternion_multiply(q0, q1, normalize=True):
     """Hamilton product of two quaternions."""
-    order = "xyzs"
     if normalize:
         q0 = qunit(q0)
         q1 = qunit(q1)

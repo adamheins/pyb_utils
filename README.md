@@ -79,7 +79,7 @@ as obstacles:
 >>> ball = pyb_utils.BulletBody.sphere(position=[0, 0, 1.5], radius=0.5)
 
 # now put it somewhere else
-ball.set_pose(position=[2, 0, 0.5])
+>>> ball.set_pose(position=[2, 0, 0.5])
 ```
 
 Third, we wrap some PyBullet functions to return *named* tuples, rather than
