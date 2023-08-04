@@ -71,7 +71,11 @@ ConstraintInfo = namedtuple(
 
 def getDynamicsInfo(bodyUniqueId, linkIndex, physicsClientId=0):
     return DynamicsInfo(
-        *pyb.getDynamicsInfo(bodyUniqueId, linkIndex, physicsClientId)
+        *pyb.getDynamicsInfo(
+            bodyUniqueId=bodyUniqueId,
+            linkIndex=linkIndex,
+            physicsClientId=physicsClientId,
+        )
     )
 
 
@@ -79,7 +83,11 @@ def getContactPoints(
     bodyA=-1, bodyB=-1, linkIndexA=-2, linkIndexB=-2, physicsClientId=0
 ):
     points_raw = pyb.getContactPoints(
-        bodyA, bodyB, linkIndexA, linkIndexB, physicsClientId
+        bodyA=bodyA,
+        bodyB=bodyB,
+        linkIndexA=linkIndexA,
+        linkIndexB=linkIndexB,
+        physicsClientId=physicsClientId,
     )
     return [ContactPoint(*point) for point in points_raw]
 
@@ -88,12 +96,20 @@ def getClosestPoints(
     bodyA, bodyB, distance, linkIndexA=-2, linkIndexB=-2, physicsClientId=0
 ):
     points_raw = pyb.getClosestPoints(
-        bodyA, bodyB, distance, linkIndexA, linkIndexB, physicsClientId
+        bodyA=bodyA,
+        bodyB=bodyB,
+        distance=distance,
+        linkIndexA=linkIndexA,
+        linkIndexB=linkIndexB,
+        physicsClientId=physicsClientId,
     )
     return [ContactPoint(*point) for point in points_raw]
 
 
 def getConstraintInfo(constraintUniqueId, physicsClientId=0):
     return ConstraintInfo(
-        *pyb.getConstraintInfo(constraintUniqueId, physicsClientId)
+        *pyb.getConstraintInfo(
+            constraintUniqueId=constraintUniqueId,
+            physicsClientId=physicsClientId,
+        )
     )
