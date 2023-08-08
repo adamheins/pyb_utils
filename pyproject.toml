@@ -10,8 +10,8 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.7,<3.11"
-numpy = "^1.21.5"
+python = ">=3.8,<3.11"
+numpy = "^1.22.0"
 pybullet = "^3.2.1"
 spatialmath-python = ">=1.0.0"
 Pillow = "^9.0.0"
