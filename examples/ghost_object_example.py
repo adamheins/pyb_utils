@@ -52,7 +52,7 @@ def main():
     )
 
     # sphere attached to the robot's end effector
-    ghost_relative = GhostSphere(
+    ghost_relative = pyb_utils.GhostObject.sphere(
         radius=0.1,
         color=(1, 0, 0, 0.5),
         parent_body_uid=robot.uid,
@@ -69,7 +69,7 @@ def main():
         # be recomputed whenever its parent (the robot) moves
         ghost_relative.update()
 
-        time.sleep(DT)
+        time.sleep(TIMESTEP)
         pyb.stepSimulation()
 
 
