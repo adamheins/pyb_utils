@@ -125,7 +125,13 @@ class Camera:
             projectionMatrix=self.proj_matrix,
             renderer=pyb.ER_BULLET_HARDWARE_OPENGL,
         )
-        return rgba, depth, seg
+
+        # the image has height rows x width columns
+        return (
+            np.array(rgba, dtype=np.uint8).reshape((self.height, self.width, 4)),
+            np.array(depth).reshape((self.height, self.width)),
+            np.array(seg).reshape((self.height, self.width)),
+        )
 
     def save_frame(self, filename, rgba=None):
         """Save a frame to a file.
@@ -137,10 +143,7 @@ class Camera:
         """
         if rgba is None:
             rgba, _, _ = self.get_frame()
-        img = Image.fromarray(
-            np.reshape(rgba, (self.height, self.width, 4)), "RGBA"
-        )
-        img.save(filename)
+        Image.fromarray(rgba, "RGBA").save(filename)
 
     def linearize_depth(self, depth=None):
         """Convert depth map to actual distance from camera plane.
