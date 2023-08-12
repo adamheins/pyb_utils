@@ -136,5 +136,8 @@ problem. Currently known issues:
   however.
 * Ghost objects sometimes flicker (spooky, but undesirable).
 
+## Development
+* Run `tox` to run the tests.
+
 ## License
 [MIT](https://github.com/adamheins/pyb_utils/blob/main/LICENSE)
