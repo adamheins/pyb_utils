@@ -72,12 +72,13 @@ def index_collision_pairs(physics_uid, bodies, named_collision_pairs):
 class CollisionDetector:
     def __init__(self, col_id, bodies, named_collision_pairs):
         self.col_id = col_id
-        self.robot_id = bodies["robot"]
+        # self.robot_id = bodies["robot"]
+        self.bodies = bodies
         self.indexed_collision_pairs = index_collision_pairs(
             self.col_id, bodies, named_collision_pairs
         )
 
-    def compute_distances(self, q, max_distance=1.0):
+    def compute_distances(self, q=None, max_distance=1.0):
         """Compute closest distances for a given configuration.
 
         Parameters:
@@ -91,12 +92,15 @@ class CollisionDetector:
         """
 
         # put the robot in the given configuration
-        for i in range(
-            pyb.getNumJoints(self.robot_id, physicsClientId=self.col_id)
-        ):
-            pyb.resetJointState(
-                self.robot_id, i, q[i], physicsClientId=self.col_id
-            )
+        if q is not None:
+            for i in range(
+                pyb.getNumJoints(
+                    self.bodies["robot"], physicsClientId=self.col_id
+                )
+            ):
+                pyb.resetJointState(
+                    self.robot_id, i, q[i], physicsClientId=self.col_id
+                )
 
         # compute shortest distances between all object pairs
         distances = []
@@ -119,7 +123,7 @@ class CollisionDetector:
 
         return np.array(distances)
 
-    def in_collision(self, q, margin=0):
+    def in_collision(self, q=None, margin=0):
         """Returns True if configuration q is in collision, False otherwise.
 
         Parameters:

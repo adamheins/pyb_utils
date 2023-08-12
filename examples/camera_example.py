@@ -59,6 +59,9 @@ def main():
     points = points[mask, :]
 
     fig = plt.figure()
+    plt.imshow(seg)
+
+    fig = plt.figure()
     ax = fig.add_subplot(projection="3d")
     ax.scatter(points[:, 0], points[:, 1], zs=points[:, 2])
     ax.set_xlabel("x")

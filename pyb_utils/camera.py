@@ -190,7 +190,7 @@ class Camera:
                 not provided, `self.get_frame()` is called to retrieve this
                 data.
 
-        Returns: A (width, height, 3)-dimensional array of points seen by the
+        Returns: A (height, width, 3)-dimensional array of points seen by the
             camera.
         """
         if depth is None:
@@ -207,7 +207,7 @@ class Camera:
 
         # depth is stored (height * width) (i.e., transpose of what one might
         # expect on the numpy side)
-        points = np.zeros((self.width, self.height, 3))
+        points = np.zeros((self.height, self.width, 3))
         for h in range(self.height):
             for w in range(self.width):
                 # convert to normalized device coordinates
@@ -227,7 +227,7 @@ class Camera:
 
                 # normalize homogenous coordinates to get rid of perspective
                 # divide
-                points[w, h, :] = (
+                points[h, w, :] = (
                     r_world_unnormalized[:3] / r_world_unnormalized[3]
                 )
         return points
