@@ -91,3 +91,24 @@ def test_constraint_info():
     info = pyb_utils.getConstraintInfo(constraint_id)
     assert np.allclose(info.jointPivotInParent, np.zeros(3))
     assert np.allclose(info.jointPivotInChild, [2, 0, 0.5])
+
+
+def test_joint_info():
+    pyb.setAdditionalSearchPath(pybullet_data.getDataPath())
+    robot = pyb_utils.Robot(
+        pyb.loadURDF(
+            "kuka_iiwa/model.urdf",
+            [0, 0, 0],
+            useFixedBase=True,
+        )
+    )
+
+    # names are as expected when decoded
+    info = pyb_utils.getJointInfo(robot.uid, 2, decode="utf8")
+    assert info.jointIndex == 2
+    assert info.jointName == "lbr_iiwa_joint_3"
+    assert info.linkName == "lbr_iiwa_link_3"
+
+    info = pyb_utils.getJointInfo(robot.uid, 2, decode=None)
+    assert info.jointName != "lbr_iiwa_joint_3"
+    assert info.linkName != "lbr_iiwa_link_3"

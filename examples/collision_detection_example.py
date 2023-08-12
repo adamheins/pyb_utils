@@ -57,7 +57,7 @@ def create_robot_debug_params(robot_id, gui_id):
     """Create debug params to set the robot joint positions from the GUI."""
     params = {}
     for i in range(pyb.getNumJoints(robot_id, physicsClientId=gui_id)):
-        joint_name = pyb.getJointInfo(robot_id, i)[1].decode("ascii")
+        joint_name = pyb_utils.getJointInfo(robot_id, i, decode="utf8").jointName
         params[joint_name] = pyb.addUserDebugParameter(
             joint_name,
             rangeMin=-2 * np.pi,
@@ -74,7 +74,7 @@ def read_robot_configuration(robot_id, robot_params, gui_id):
     q = np.zeros(n)
 
     for i in range(n):
-        joint_name = pyb.getJointInfo(robot_id, i)[1].decode("ascii")
+        joint_name = pyb_utils.getJointInfo(robot_id, i, decode="utf8").jointName
         q[i] = pyb.readUserDebugParameter(
             robot_params[joint_name],
             physicsClientId=gui_id,
@@ -118,7 +118,9 @@ def main():
     cube1 = pyb_utils.NamedCollisionObject("cube1")
     cube2 = pyb_utils.NamedCollisionObject("cube2")
     cube3 = pyb_utils.NamedCollisionObject("cube3")
-    link7 = pyb_utils.NamedCollisionObject("robot", "lbr_iiwa_link_7")  # last link
+    link7 = pyb_utils.NamedCollisionObject(
+        "robot", "lbr_iiwa_link_7"
+    )  # last link
 
     col_detector = pyb_utils.CollisionDetector(
         col_id,

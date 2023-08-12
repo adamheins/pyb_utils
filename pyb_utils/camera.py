@@ -113,9 +113,9 @@ class Camera:
         """Get a frame from the camera.
 
         Returns:
-            rgba: The RGBA colour data
-            depth: Depth buffer
-            seg: Segmentation mask
+            rgba: The RGBA colour data of shape (height, width, 4)
+            depth: Depth buffer of shape (height, width)
+            seg: Segmentation mask of shape (height, width)
         """
         _, _, rgba, depth, seg = pyb.getCameraImage(
             width=self.width,
@@ -190,7 +190,7 @@ class Camera:
                 not provided, `self.get_frame()` is called to retrieve this
                 data.
 
-        Returns: A (height, width, 3)-dimensional array of points seen by the
+        Returns: A size (height, width, 3) array of points seen by the
             camera.
         """
         if depth is None:

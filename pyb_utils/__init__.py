@@ -10,9 +10,10 @@ from .math import (
     quaternion_rotate,
 )
 from .named_tuples import (
-    getDynamicsInfo,
-    getContactPoints,
     getClosestPoints,
     getConstraintInfo,
+    getContactPoints,
+    getDynamicsInfo,
+    getJointInfo,
 )
 from .robots import Robot

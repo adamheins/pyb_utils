@@ -68,6 +68,29 @@ ConstraintInfo = namedtuple(
     ],
 )
 
+JointInfo = namedtuple(
+    "JointInfo",
+    [
+        "jointIndex",
+        "jointName",
+        "jointType",
+        "qIndex",
+        "uIndex",
+        "flags",
+        "jointDamping",
+        "jointFriction",
+        "jointLowerLimit",
+        "jointUpperLimit",
+        "jointMaxForce",
+        "jointMaxVelocity",
+        "linkName",
+        "jointAxis",
+        "parentFramePos",
+        "parentFrameOrn",
+        "parentIndex",
+    ],
+)
+
 
 def getDynamicsInfo(bodyUniqueId, linkIndex, physicsClientId=0):
     return DynamicsInfo(
@@ -113,3 +136,25 @@ def getConstraintInfo(constraintUniqueId, physicsClientId=0):
             physicsClientId=physicsClientId,
         )
     )
+
+
+def getJointInfo(bodyUniqueId, jointIndex, physicsClientId=0, decode=None):
+    """The one difference from the PyBullet API is the addition of the optional
+    `decode` argument.
+
+    If `decode` is not None, then it is used to decode the strings of bytes
+    returned by the PyBullet API for the `jointName` and `linkName` fields.
+    """
+    info = JointInfo(
+        *pyb.getJointInfo(
+            bodyUniqueId=bodyUniqueId,
+            jointIndex=jointIndex,
+            physicsClientId=physicsClientId,
+        )
+    )
+    if decode is not None:
+        info = info._replace(
+            jointName=info.jointName.decode(decode),
+            linkName=info.linkName.decode(decode),
+        )
+    return info

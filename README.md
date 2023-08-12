@@ -84,9 +84,9 @@ as obstacles:
 
 Third, we wrap some PyBullet functions to return *named* tuples, rather than
 normal tuples. When the tuples have 10+ fields in them, it is rather helpful to
-have names! The names and parameters of these functions are exactly the same as
-the underlying PyBullet ones, to make swapping effortless. Continuing our
-previous example:
+have names! The names and arguments of these functions are the same as the
+underlying PyBullet ones, to make swapping effortless. Continuing our previous
+example:
 ```python
 # built-in PyBullet method
 # the output is not easy to read!
@@ -112,6 +112,11 @@ previous example:
 >>> info.localInertiaPos
 (0.0, 0.0, 0.0)
 ```
+The functions we've wrapped in this way are `getClosestPoints`,
+`getConstraintInfo`, `getContactPoints`, `getDynamicsInfo`, and `getJointInfo`.
+The one difference from the PyBullet API is that in pyb_utils `getJointInfo`
+also accepts an optional argument `decode`, which will convert the byte strings
+returned by PyBullet to the specifed encoding. For example, `decode="utf8"`.
 
 And there's more! You can find example scripts of all of this package's
 utilities in the `examples/` directory:

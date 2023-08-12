@@ -3,6 +3,8 @@ from dataclasses import dataclass
 import numpy as np
 import pybullet as pyb
 
+from .named_tuples import getJointInfo
+
 
 @dataclass
 class NamedCollisionObject:
@@ -46,8 +48,7 @@ def index_collision_pairs(physics_uid, bodies, named_collision_pairs):
         body_link_map[name] = {}
         n = pyb.getNumJoints(uid, physics_uid)
         for i in range(n):
-            info = pyb.getJointInfo(uid, i, physics_uid)
-            link_name = info[12].decode("utf-8")
+            link_name = getJointInfo(uid, i, physics_uid, decode="utf8").linkName
             body_link_map[name][link_name] = i
 
     def _index_named_collision_object(obj):
@@ -93,13 +94,12 @@ class CollisionDetector:
 
         # put the robot in the given configuration
         if q is not None:
+            robot_id = self.bodies["robot"]
             for i in range(
-                pyb.getNumJoints(
-                    self.bodies["robot"], physicsClientId=self.col_id
-                )
+                pyb.getNumJoints(robot_id, physicsClientId=self.col_id)
             ):
                 pyb.resetJointState(
-                    self.robot_id, i, q[i], physicsClientId=self.col_id
+                    robot_id, i, q[i], physicsClientId=self.col_id
                 )
 
         # compute shortest distances between all object pairs
