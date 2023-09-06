@@ -15,7 +15,7 @@ including:
 * Basic quaternion functions.
 
 ## Install and run
-This package requires **Python 3.7+**. It has been tested on Ubuntu 16.04,
+This package requires **Python 3.8+**. It has been tested on Ubuntu 16.04,
 18.04, and 20.04.
 
 ### From pip
@@ -138,6 +138,8 @@ problem. Currently known issues:
 
 ## Development
 * Run `tox` to run the tests.
+* Sphinx is used to build the documentation. With Sphinx installed, run `make
+  html` in the `docs` directory.
 
 ## License
 [MIT](https://github.com/adamheins/pyb_utils/blob/main/LICENSE)

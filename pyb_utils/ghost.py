@@ -1,3 +1,4 @@
+"""This module provides utilities for "ghost" (visual-only) objects."""
 import numpy as np
 import pybullet as pyb
 
@@ -10,6 +11,26 @@ class GhostObject:
     The GhostObject can be "attached" to another body and positioned relative
     to that body, or it can be positioned at an absolute location in the world
     frame.
+
+    Parameters
+    ----------
+    visual_uid : int
+        The UID of the visual PyBullet object to use.
+    position : iterable
+        The object's position (optional). Defaults to
+        ``(0, 0, 0)``. If ``parent_body_uid`` is also specified, then the
+        position is relative to that body, otherwise it is relative to the
+        world.
+    orientation : iterable
+        The object's orientation, as a quaternion :math:`(x, y, z, w)`
+        (optional). Defaults to ``(0, 0, 0, 1)``. If ``parent_body_uid`` is
+        also specified, then the orientation is relative to that body,
+        otherwise it is relative to the world.
+    parent_body_uid : int
+        The UID of an existing body to "attach" this object to (optional).
+    parent_link_index : int
+        The index of the link on the parent body to attach this object to
+        (optional). Defaults to `-1` (the base link).
     """
 
     def __init__(
@@ -20,22 +41,6 @@ class GhostObject:
         parent_body_uid=None,
         parent_link_index=-1,
     ):
-        """Initialize the GhostObject.
-
-        Parameters:
-            visual_uid: The unique index of the visual PyBullet object to use.
-            position: Optionally provide the object's position. Defaults to
-                (0, 0, 0). If `parent_body_uid` is also specified, then the
-                position is relative to that body, otherwise it is absolute.
-            orientation: Optionally provide the object's orientation, as a
-                quaternion using xyzw ordering. Defaults to (0, 0, 0, 1). If
-                `parent_body_uid` is also specified, then the orientation is
-                relative to that body, otherwise it is absolute.
-            parent_body_uid: Optionally provide the unique index of an existing
-                body to "attach" this object to.
-            parent_link_index: The index of the link on the parent body to
-                attach this object to. Defaults to -1 (the base link).
-        """
         if position is None:
             position = (0, 0, 0)
         if orientation is None:
@@ -63,9 +68,28 @@ class GhostObject:
         position=None,
         parent_body_uid=None,
         parent_link_index=-1,
-        color=(1, 0, 0, 0),
+        color=(1, 0, 0, 1),
     ):
-        """Spherical ghost object."""
+        """Create a spherical ghost object.
+
+        Parameters
+        ----------
+        radius : float
+            The radius of the sphere.
+        position : iterable
+            The object's position (optional). Defaults to
+            ``(0, 0, 0)``. If ``parent_body_uid`` is also specified, then the
+            position is relative to that body, otherwise it is relative to the
+            world.
+        parent_body_uid : int
+            The UID of an existing body to "attach" this object to (optional).
+        parent_link_index : int
+            The index of the link on the parent body to attach this object to
+            (optional). Defaults to `-1` (the base link).
+        color : iterable
+            The ``(r, g, b, α)`` color of the sphere (optional). Defaults to
+            red.
+            """
         visual_uid = pyb.createVisualShape(
             shapeType=pyb.GEOM_SPHERE,
             radius=radius,
@@ -103,8 +127,7 @@ class GhostObject:
         return self.position, self.orientation
 
     def update(self, position=None, orientation=None):
-        """Update the pose of the object, optionally updating position and/or
-        orientation.
+        """Update the pose of the object.
 
         If the object has a parent, then this should be called every time the
         simulation rendering is updated. The object's pose in the world is
@@ -113,6 +136,14 @@ class GhostObject:
 
         Otherwise, this function can be used to change the object's absolute
         pose in the world.
+
+        Parameters
+        ----------
+        position : iterable
+            The new position of the object (optional).
+        orientation : iterable
+            The new orientation of the object, as a quaternion :math:`(x, y, z,
+            w)` (optional).
         """
         if position is not None:
             self.position = np.array(position)

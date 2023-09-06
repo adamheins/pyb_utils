@@ -1,7 +1,7 @@
 """Wrappers for PyBullet methods that return large tuples.
 
-This submodule returns the same info in a named tuple, so the fields can be
-easily identified.
+This submodule returns the same information in a named tuple, so the fields can
+be easily identified.
 """
 from collections import namedtuple
 
@@ -93,6 +93,21 @@ JointInfo = namedtuple(
 
 
 def getDynamicsInfo(bodyUniqueId, linkIndex, physicsClientId=0):
+    """Get information about the dynamic properties of a link.
+
+    Parameters
+    ----------
+    bodyUniqueId : int
+        The UID of the body.
+    linkIndex : int
+        The index of the link on the body.
+    physicsClientId : int
+        The UID of the physics server to use.
+
+    Returns
+    -------
+    DynamicsInfo
+    """
     return DynamicsInfo(
         *pyb.getDynamicsInfo(
             bodyUniqueId=bodyUniqueId,
@@ -105,6 +120,28 @@ def getDynamicsInfo(bodyUniqueId, linkIndex, physicsClientId=0):
 def getContactPoints(
     bodyA=-1, bodyB=-1, linkIndexA=-2, linkIndexB=-2, physicsClientId=0
 ):
+    """Get the contact points between two bodies or specific links.
+
+    Parameters
+    ----------
+    bodyA : int
+        The UID of the first body.
+    bodyB : int
+        The UID of the second body.
+    linkIndexA : int
+        The index of the link on the first body (optional). If not provided,
+        checks all links on the body.
+    linkIndexB : int
+        The index of the link on the second body (optional). If not provided,
+        checks all links on the body.
+    physicsClientId : int
+        The UID of the physics server to use.
+
+    Returns
+    -------
+    :
+        A list of ``ContactPoint``.
+    """
     points_raw = pyb.getContactPoints(
         bodyA=bodyA,
         bodyB=bodyB,
@@ -118,6 +155,29 @@ def getContactPoints(
 def getClosestPoints(
     bodyA, bodyB, distance, linkIndexA=-2, linkIndexB=-2, physicsClientId=0
 ):
+    """Get the closest points between two bodies or specific links.
+
+    Parameters
+    ----------
+    bodyA : int
+        The UID of the first body.
+    bodyB : int
+        The UID of the second body.
+    linkIndexA : int
+        The index of the link on the first body (optional). If not provided,
+        checks all links on the body.
+    linkIndexB : int
+        The index of the link on the second body (optional). If not provided,
+        checks all links on the body.
+    physicsClientId : int
+        The UID of the physics server to use.
+
+    Returns
+    -------
+    :
+        A list of ``ContactPoint`` representing the closest points. Normal
+        force is always zero.
+    """
     points_raw = pyb.getClosestPoints(
         bodyA=bodyA,
         bodyB=bodyB,
@@ -130,6 +190,19 @@ def getClosestPoints(
 
 
 def getConstraintInfo(constraintUniqueId, physicsClientId=0):
+    """Get information about a constraint.
+
+    Parameters
+    ----------
+    constraintUniqueId : int
+        UID of the constraint
+    physicsClientId : int
+        UID of the physics server to use.
+
+    Returns
+    -------
+    ConstraintInfo
+    """
     return ConstraintInfo(
         *pyb.getConstraintInfo(
             constraintUniqueId=constraintUniqueId,
@@ -139,11 +212,28 @@ def getConstraintInfo(constraintUniqueId, physicsClientId=0):
 
 
 def getJointInfo(bodyUniqueId, jointIndex, physicsClientId=0, decode=None):
-    """The one difference from the PyBullet API is the addition of the optional
-    `decode` argument.
+    """Get information about a joint.
 
-    If `decode` is not None, then it is used to decode the strings of bytes
-    returned by the PyBullet API for the `jointName` and `linkName` fields.
+    The one difference from the PyBullet API is the addition of the optional
+    ``decode`` argument.
+
+    If ``decode`` is not ``None``, then it is used to decode the strings of bytes
+    returned by the PyBullet API for the ``jointName`` and ``linkName`` fields.
+
+    Parameters
+    ----------
+    bodyUniqueId : int
+        UID of the body with the joint.
+    jointIndex : int
+        Index of the joint on the body.
+    physicsClientId : int
+        The UID of the physics server to use.
+    decode : str
+        The encoding to use to convert the bytes fields to strings.
+
+    Returns
+    -------
+    JointInfo
     """
     info = JointInfo(
         *pyb.getJointInfo(

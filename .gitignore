@@ -2,3 +2,5 @@
 *.avi
 *.png
 dist/
+.tox/
+.venv/

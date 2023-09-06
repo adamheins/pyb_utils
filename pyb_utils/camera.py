@@ -1,4 +1,4 @@
-"""Provides a utility Camera class for PyBullet."""
+"""This module provides a utility ``Camera`` class for PyBullet."""
 import numpy as np
 import pybullet as pyb
 from PIL import Image
@@ -6,7 +6,23 @@ import cv2
 
 
 class Camera:
-    """A PyBullet camera."""
+    """A PyBullet camera, which captures images of the simulation environment.
+
+    Parameters
+    ----------
+    view_matrix : iterable
+        The camera's view matrix.
+    near : float
+        Near value
+    far : float
+        Far value
+    fov : float
+        Field of view
+    width : int
+        Width of the image in pixels
+    height : int
+        Height of the image in pixels
+    """
 
     def __init__(
         self,
@@ -40,14 +56,22 @@ class Camera:
     ):
         """Construct a new camera from target and camera positions.
 
-        Parameters:
-            target_position: The position of the camera's target point
-            camera_position: The position of the camera in the world
-            near: Near value
-            far: Far value
-            fov: Field of view
-            width: Width of the image
-            height: Height of the image
+        Parameters
+        ----------
+        target_position : iterable
+            The position of the camera's target point.
+        camera_position : iterable
+            The position of the camera in the world.
+        near : float
+            Near value
+        far : float
+            Far value
+        fov : float
+            Field of view
+        width : int
+            Width of the image in pixels
+        height : int
+            Height of the image in pixels
         """
         view_matrix = pyb.computeViewMatrix(
             cameraEyePosition=camera_position,
@@ -80,17 +104,28 @@ class Camera:
         """Construct a new camera from target position, distance, and roll,
         pitch, yaw angles.
 
-        Parameters:
-            target_position: The position of the camera's target point
-            distance: Distance of camera from target.
-            roll: Roll of the camera.
-            pitch: Pitch of the camera.
-            yaw: Yaw of the camera.
-            near: Near value
-            far: Far value
-            fov: Field of view
-            width: Width of the image
-            height: Height of the image
+        Parameters
+        ----------
+        target_position : iterable
+            The position of the camera's target point.
+        distance : float
+            The distance of camera from target.
+        roll : float
+            Roll of the camera's orientation.
+        pitch : float
+            Pitch of the camera's orientation.
+        yaw : float
+            Yaw of the camera's orientation.
+        near : float
+            Near value
+        far : float
+            Far value
+        fov : float
+            Field of view
+        width : int
+            Width of the image in pixels
+        height : int
+            Height of the image in pixels
         """
         view_matrix = pyb.computeViewMatrixFromYawPitchRoll(
             distance=distance,
@@ -112,10 +147,13 @@ class Camera:
     def get_frame(self):
         """Get a frame from the camera.
 
-        Returns:
-            rgba: The RGBA colour data of shape (height, width, 4)
-            depth: Depth buffer of shape (height, width)
-            seg: Segmentation mask of shape (height, width)
+        Returns
+        -------
+        :
+            A tuple ``(rgba, depth, seg)``, where ``rgba`` is the RGBA color
+            data of shape ``(height, width, 4)``, ``depth`` is the depth buffer
+            of shape ``(height, width)``, and ``seg`` is the segmentation mask
+            of shape ``(height, width)``.
         """
         _, _, rgba, depth, seg = pyb.getCameraImage(
             width=self.width,
@@ -136,10 +174,14 @@ class Camera:
     def save_frame(self, filename, rgba=None):
         """Save a frame to a file.
 
-        Parameters:
-            filename: The name of the image file
-            rgba: Optional, RGBA data provided by `Camera.get_frame()`. If not
-                provided, `self.get_frame()` is called to retrieve this data.
+        Parameters
+        ----------
+        filename : str
+            The name of the image file.
+        rgba : np.ndarray
+            Optionally, the user can provide the RGBA data from a previous call
+            to ``Camera.get_frame()``. If not provided, ``self.get_frame()`` is
+            called to retrieve this data.
         """
         if rgba is None:
             rgba, _, _ = self.get_frame()
@@ -148,15 +190,20 @@ class Camera:
     def linearize_depth(self, depth=None):
         """Convert depth map to actual distance from camera plane.
 
-        See <https://stackoverflow.com/a/6657284>.
+        See https://stackoverflow.com/a/6657284.
 
-        Parameters:
-            depth: Optional, depth buffer provided by `Camera.get_frame()`. If
-                not provided, `self.get_frame()` is called to retrieve this
-                data.
+        Parameters
+        ----------
+        depth : np.ndarray
+            Optionally, the user can provide the depth buffer from a previous
+            call to ``Camera.get_frame()``. If not provided,
+            ``self.get_frame()`` is called to retrieve this data.
 
-        Returns: linearized depth buffer: actual depth values from the camera
-            plane
+        Returns
+        -------
+        :
+            Linearized depth buffer, consisting of the actual depth values from
+            the camera plane.
         """
         if depth is None:
             _, depth, _ = self.get_frame()
@@ -170,7 +217,15 @@ class Camera:
         return depth_linear
 
     def set_camera_pose(self, position, target):
-        """Change position and target of the camera."""
+        """Change the position and target of the camera.
+
+        Parameters
+        ----------
+        position : iterable
+            The position of the camera in the world.
+        target : iterable
+            The position of the camera's target point.
+        """
         self.position = position
         self.target = target
         self.view_matrix = pyb.computeViewMatrix(
@@ -182,16 +237,20 @@ class Camera:
     def get_point_cloud(self, depth=None):
         """Convert depth buffer to 3D point cloud in world coordinates.
 
-        See <https://stackoverflow.com/a/62247245> for the main source of this
+        See https://stackoverflow.com/a/62247245 for the main source of this
         code.
 
-        Parameters:
-            depth: Optional, depth buffer provided by `Camera.get_frame()`. If
-                not provided, `self.get_frame()` is called to retrieve this
-                data.
+        Parameters
+        ----------
+        depth : np.ndarray
+            Optionally, the user can provide the depth buffer from a previous
+            call to ``Camera.get_frame()``. If not provided,
+            ``self.get_frame()`` is called to retrieve this data.
 
-        Returns: A size (height, width, 3) array of points seen by the
-            camera.
+        Returns
+        -------
+        An array of shape ``(height, width, 3)`` representing the points seen
+        by the camera.
         """
         if depth is None:
             _, depth, _ = self.get_frame()
@@ -205,8 +264,6 @@ class Camera:
 
         PV_inv = np.linalg.inv(P @ V)
 
-        # depth is stored (height * width) (i.e., transpose of what one might
-        # expect on the numpy side)
         points = np.zeros((self.height, self.width, 3))
         for h in range(self.height):
             for w in range(self.width):
@@ -234,17 +291,20 @@ class Camera:
 
 
 class VideoRecorder:
-    """Recorder for a video of a PyBullet simulation."""
+    """Recorder for a video of a PyBullet simulation.
+
+    Parameters
+    ----------
+    filename : str
+        The name of the file to write the video to.
+    camera : Camera
+        Camera object to use for rendering frames.
+    fps : int
+        Frames per second. Each ``fps`` frames will be played over one second
+        of video.
+    """
 
     def __init__(self, filename, camera, fps, codec="mp4v"):
-        """Initialize the VideoRecorder.
-
-        Parameters:
-            filename: The file to write the video to.
-            camera: Camera object to use for rendering frames.
-            fps: Frames per second. Each `fps` frames will be played over one
-                second of video.
-        """
         self.camera = camera
         fourcc = cv2.VideoWriter_fourcc(*codec)
         self.writer = cv2.VideoWriter(
@@ -257,10 +317,13 @@ class VideoRecorder:
     def capture_frame(self, rgba=None):
         """Capture a frame and write it to the video.
 
-        Parameters:
-            rgba: If provided, write this data to the video (this can be used
-            to avoid multiple renderings with the camera). Otherwise, get the
-            frame data from the camera.
+        Parameters
+        ----------
+        rgba : np.ndarray
+            Optionally, the user can provide the RGBA data from a previous call
+            to ``Camera.get_frame()``. This can be used to avoid multiple
+            renderings with the camera. If not provided,
+            ``self.camera.get_frame()`` is called to retrieve this data.
         """
         if rgba is None:
             rgba, _, _ = self.camera.get_frame()

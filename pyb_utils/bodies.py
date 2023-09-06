@@ -1,9 +1,27 @@
+"""This module provides a utility class for creating rigid bodies in PyBullet."""
 import pybullet as pyb
 import numpy as np
 
 
 class BulletBody:
-    """Generic rigid body in PyBullet."""
+    """Generic rigid body in PyBullet.
+
+    Parameters
+    ----------
+    position : iterable
+        The :math:`(x, y, z)` position of the body in the world.
+    collision_uid : int
+        ID of the collision shape to use.
+    visual_uid : int
+        ID of the visual shape to use.
+    mass : float
+        mass of the body; defaults to `1`.
+    orientation : iterable
+        A quaternion :math:`(x, y, z, w)` representing the orientation of the body; if
+        not provided, orientation is aligned with the world frame axes.
+    client_id : int
+        physics client ID; only required if connected to multiple servers.
+    """
 
     def __init__(
         self,
@@ -15,17 +33,6 @@ class BulletBody:
         client_id=0,
         **kwargs
     ):
-        """
-        Parameters:
-            position: iterable of length 3; position in the world.
-            collision_uid: ID of the collision shape to use.
-            visual_uid: ID of the visual shape to use.
-            mass: mass of the body; defaults to 1.
-            orientation: iterable of length 4 representing a quaternion (x, y, z, w);
-                if not provided, orientation is aligned with the world frame axes.
-            client_id: physics client ID; only required if connected to
-                multiple servers.
-        """
         if orientation is None:
             orientation = (0, 0, 0, 1)
 
@@ -46,12 +53,16 @@ class BulletBody:
     ):
         """Create a cuboid body.
 
-        Parameters:
-            position: iterable of length 3; position in the world.
-            half_extents: iterable of length 3; half lengths of the body.
-            color: 4-tuple (r, g, b, α).
-            client_id: physics client ID; only required if connected to
-                multiple servers.
+        Parameters
+        ----------
+        position : iterable
+            The `(x, y, z)` position of the box in the world.
+        half_extents : iterable
+            The three half lengths of the box.
+        color : iterable
+            The `(r, g, b, α)` color of the box.
+        client_id : int
+            Physics client ID; only required if connected to multiple servers.
         """
         collision_uid = pyb.createCollisionShape(
             shapeType=pyb.GEOM_BOX,
@@ -74,12 +85,16 @@ class BulletBody:
     ):
         """Create a spherical body.
 
-        Parameters:
-            position: iterable of length 3; position in the world.
-            radius: radius of the sphere.
-            color: 4-tuple (r, g, b, α).
-            client_id: physics client ID; only required if connected to
-                multiple servers.
+        Parameters
+        ----------
+        position : iterable
+            The `(x, y, z)` position of the sphere in the world.
+        radius : float
+            The radius of the sphere.
+        color : iterable
+            The `(r, g, b, α)` color of the sphere.
+        client_id : int
+            Physics client ID; only required if connected to multiple servers.
         """
         collision_uid = pyb.createCollisionShape(
             shapeType=pyb.GEOM_SPHERE,
@@ -105,13 +120,18 @@ class BulletBody:
         The cylinder is oriented along its z-axis, which corresponds to the
         height.
 
-        Parameters:
-            position: iterable of length 3; position in the world.
-            radius: radius of the cylinder.
-            height: the height of the cylinder.
-            color: 4-tuple (r, g, b, α).
-            client_id: physics client ID; only required if connected to
-                multiple servers.
+        Parameters
+        ----------
+        position : iterable
+            The `(x, y, z)` position of the cylinder in the world.
+        radius : float
+            The radius of the cylinder.
+        height: float
+            The height of the cylinder.
+        color : iterable
+            The `(r, g, b, α)` color of the cylinder.
+        client_id : int
+            Physics client ID; only required if connected to multiple servers.
         """
         collision_uid = pyb.createCollisionShape(
             shapeType=pyb.GEOM_CYLINDER,
@@ -140,13 +160,18 @@ class BulletBody:
         The capsule is oriented along its z-axis, which corresponds to the
         height.
 
-        Parameters:
-            position: iterable of length 3; position in the world.
-            radius: radius of the capsule.
-            height: the height of the capsule.
-            color: 4-tuple (r, g, b, α).
-            client_id: physics client ID; only required if connected to
-                multiple servers.
+        Parameters
+        ----------
+        position : iterable
+            The `(x, y, z)` position of the capsule in the world.
+        radius : float
+            The radius of the capsule.
+        height: float
+            The height of the capsule.
+        color : iterable
+            The `(r, g, b, α)` color of the capsule.
+        client_id : int
+            Physics client ID; only required if connected to multiple servers.
         """
         collision_uid = pyb.createCollisionShape(
             shapeType=pyb.GEOM_CAPSULE,
@@ -168,9 +193,11 @@ class BulletBody:
     def get_pose(self):
         """Get the position and orientation of the body.
 
-        Returns a tuple (position, orientation), where the position is of array
-        of length 3 and orientation is an array of length 4 representing a
-        quaternion (x, y, z, w).
+        Returns
+        -------
+        :
+            A tuple ``(position, orientation)`` with position :math:`(x, y, z)`
+            and orientation quaternion :math:`(x, y, z, w)`.
         """
         pos, orn = pyb.getBasePositionAndOrientation(
             self.uid, physicsClientId=self.client_id
@@ -180,8 +207,11 @@ class BulletBody:
     def get_velocity(self):
         """Get the velocity of the body.
 
-        Returns a tuple (linear, angular) containing the linear and angular
-        velocity, where each is an array of length 3.
+        Returns
+        -------
+        :
+            A tuple ``(linear, angular)`` containing the linear and angular
+            velocity, each an array of length 3.
         """
         linear, angular = pyb.getBaseVelocity(
             self.uid, physicsClientId=self.client_id
@@ -191,10 +221,13 @@ class BulletBody:
     def set_pose(self, position=None, orientation=None):
         """Set the position and orientation of the body.
 
-        Parameters:
-            position: iterable of length 3; if not provided, position is unchanged.
-            orientation: iterable of length 4 representing a quaternion (x, y,
-                z, w); if not provided, orientation is unchanged.
+        Parameters
+        ----------
+        position : iterable
+            The :math:`(x, y, z)` position of the body in the world.
+        orientation : iterable
+            A quaternion :math:`(x, y, z, w)` representing the orientation of
+            the body.
         """
         current_pos, current_orn = self.get_pose()
         if position is None:
@@ -211,9 +244,14 @@ class BulletBody:
     def set_velocity(self, linear=None, angular=None):
         """Set the velocity of the body.
 
-        Parameters:
-            linear: iterable of length 3; if not provided, linear velocity is unchanged.
-            angular: iterable of length 3; if not provided, angular velocity is unchanged.
+        Parameters
+        ----------
+        linear : iterable
+            Linear velocity of the body. If not provided, linear velocity is
+            unchanged.
+        angular : iterable
+            Angular velocity of the body. If not provided, angular velocity is
+            unchanged.
         """
         current_linear, current_angular = self.get_velocity()
         if linear is None:
@@ -232,13 +270,18 @@ class BulletBody:
     ):
         """Apply a wrench (i.e., force and torque) to the body.
 
-        Paramters:
-            force: iterable of length 3; if not provided, no force is applied.
-            torque: iterable of length 3; if not provided, no torque is applied.
-            position: iterable of length 3; if not provided, force acts at the
-                origin of the specified frame. Has no effect on the torque.
-            frame: int representing the coordinate frame. Can be either
-                pyb.LINK_FRAME (the default) or pyb.WORLD_FRAME.
+        Parameters
+        ----------
+        force : iterable
+            Force to apply to the body. If not provided, no force is applied.
+        torque : iterable
+            Torque to apply to the body. If not provided, no torque is applied.
+        position : iterable
+            Position at which to apply the force. If not provided, force acts
+            at the origin of the specified frame. Has no effect on the torque.
+        frame : int
+            The coordinate frame. Can be either ``pyb.LINK_FRAME`` (the default) or
+            ``pyb.WORLD_FRAME``.
         """
         if position is None:
             position = np.zeros(3)

@@ -1,3 +1,4 @@
+"""This module provides utilities for collision checking between objects."""
 from dataclasses import dataclass
 
 import numpy as np
@@ -10,9 +11,16 @@ from .named_tuples import getJointInfo
 class NamedCollisionObject:
     """Name of a body and one of its links.
 
-    The body name must correspond to the key in the `bodies` dict, but is
+    The body name must correspond to the key in the ``bodies`` dict, but is
     otherwise arbitrary. The link name should match the URDF. The link name may
-    also be None, in which case the base link (index -1) is used.
+    also be ``None``, in which case the base link ``(index -1)`` is used.
+
+    Attributes
+    ----------
+    body_name : str
+        Name of the body.
+    link_name : str
+        Name of the link on the body.
     """
 
     body_name: str
@@ -21,8 +29,15 @@ class NamedCollisionObject:
 
 @dataclass
 class IndexedCollisionObject:
-    """Index of a body and one of its links."""
+    """Index of a body and one of its links.
 
+    Attributes
+    ----------
+    body_uid : int
+        UID of the body.
+    link_uid : int
+        Index of the link on the body.
+    """
     body_uid: int
     link_uid: int
 
@@ -33,12 +48,18 @@ def index_collision_pairs(physics_uid, bodies, named_collision_pairs):
     In other words, convert named bodies and links to the indexes used by
     PyBullet to facilate computing collisions between the objects.
 
-    Parameters:
-      physics_uid: Index of the PyBullet physics server to use.
-      bodies: dict with body name keys and corresponding indices as values
-      named_collision_pairs: a list of 2-tuples of NamedCollisionObject
+    Parameters
+    ----------
+    physics_uid : int
+        Index of the PyBullet physics server to use.
+    bodies : dict
+        A dictionary with body names as keys and corresponding UIDs as values.
+    named_collision_pairs : list
+        A list of pairs of ``NamedCollisionObject``.
 
-    Returns: a list of 2-tuples of IndexedCollisionObject
+    Returns
+    -------
+        A list of pairs of ``IndexedCollisionObject``.
     """
 
     # build a nested dictionary mapping body names to link names to link
@@ -48,7 +69,9 @@ def index_collision_pairs(physics_uid, bodies, named_collision_pairs):
         body_link_map[name] = {}
         n = pyb.getNumJoints(uid, physics_uid)
         for i in range(n):
-            link_name = getJointInfo(uid, i, physics_uid, decode="utf8").linkName
+            link_name = getJointInfo(
+                uid, i, physics_uid, decode="utf8"
+            ).linkName
             body_link_map[name][link_name] = i
 
     def _index_named_collision_object(obj):
@@ -71,9 +94,19 @@ def index_collision_pairs(physics_uid, bodies, named_collision_pairs):
 
 
 class CollisionDetector:
+    """Detector of collisions between bodies.
+
+    Parameters
+    ----------
+    col_id : int
+        Index of the physics server used for collision queries.
+    bodies : dict
+        A dictionary with body names as keys and corresponding UIDs as values.
+    named_collision_pairs : list
+        A list of pairs of ``NamedCollisionObject``.
+    """
     def __init__(self, col_id, bodies, named_collision_pairs):
         self.col_id = col_id
-        # self.robot_id = bodies["robot"]
         self.bodies = bodies
         self.indexed_collision_pairs = index_collision_pairs(
             self.col_id, bodies, named_collision_pairs
@@ -82,14 +115,20 @@ class CollisionDetector:
     def compute_distances(self, q=None, max_distance=1.0):
         """Compute closest distances for a given configuration.
 
-        Parameters:
-          q: Iterable representing the desired configuration. This is applied
-             directly to PyBullet body with index bodies["robot"].
-          max_distance: Bodies farther apart than this distance are not queried
-             by PyBullet, the return value for the distance between such bodies
-             will be max_distance.
+        Parameters
+        ----------
+        q : iterable
+            The desired configuration. This is applied directly to PyBullet
+            body with index ``bodies["robot"]``.
+        max_distance : float
+            Bodies farther apart than this distance are not queried by
+            PyBullet, the return value for the distance between such bodies
+            will be ``max_distance``.
 
-        Returns: A NumPy array of distances, one per pair of collision objects.
+        Returns
+        -------
+        :
+            An array of distances, one per pair of collision objects.
         """
 
         # put the robot in the given configuration
@@ -124,12 +163,20 @@ class CollisionDetector:
         return np.array(distances)
 
     def in_collision(self, q=None, margin=0):
-        """Returns True if configuration q is in collision, False otherwise.
+        """Check if a configuration is in collision.
 
-        Parameters:
-          q: Iterable representing the desired configuration.
-          margin: Distance at which objects are considered in collision.
-             Default is 0.0.
+        Parameters
+        ----------
+        q : iterable
+            The desired configuration of the robot.
+        margin : float
+            Distance at which objects are considered in collision. Default is
+            ``0``.
+
+        Returns
+        -------
+        :
+            True if configuration q is in collision, False otherwise.
         """
         ds = self.compute_distances(q, max_distance=margin)
         return (ds < margin).any()
