@@ -41,6 +41,10 @@ Or using pip:
 python -m pip install .
 ```
 
+## Documentation
+
+The project's documention is available [here](https://pyb-utils.readthedocs.io).
+
 ## Usage and examples
 This package provides a few basic quality of life utilities. First, PyBullet
 represents rotations using quaternions (in `[x, y, z, w]` order). We provide a
