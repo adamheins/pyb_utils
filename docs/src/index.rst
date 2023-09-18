@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 pyb_utils: utilities for PyBullet
-================================
+=================================
 
 *pyb_utils* is a collection of utilities I've found useful for working and
 doing research with PyBullet.
@@ -18,8 +18,8 @@ The source code and README can be found `here
 <https://github.com/adamheins/pyb_utils>`_, with example scripts in the
 ``examples/`` directory. There are also a couple of blog posts describing some
 of the features (see `here
-<https://adamheins.com/blog/collision-detection-pybullet>`_ and `here
-<https://adamheins.com/blog/new-features-in-pyb-utils>`_).
+<https://adamheins.com/blog/collision-detection-pybullet>`__ and `here
+<https://adamheins.com/blog/new-features-in-pyb-utils>`__).
 
 .. toctree::
    :maxdepth: 1
