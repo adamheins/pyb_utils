@@ -15,5 +15,9 @@ from .named_tuples import (
     getContactPoints,
     getDynamicsInfo,
     getJointInfo,
+    getJointState,
+    getJointStates,
+    getLinkState,
+    getLinkStates,
 )
 from .robots import Robot

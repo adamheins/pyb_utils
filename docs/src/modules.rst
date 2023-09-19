@@ -56,12 +56,14 @@ Named Tuples
 .. automodule:: pyb_utils.named_tuples
     :members:
     :undoc-members:
-    :exclude-members: DynamicsInfo, ContactPoint, ConstraintInfo, JointInfo
+    :exclude-members: DynamicsInfo, ContactPoint, ConstraintInfo, JointInfo, JointState, LinkState
 
 .. autoclass:: DynamicsInfo
 .. autoclass:: ContactPoint
 .. autoclass:: ConstraintInfo
 .. autoclass:: JointInfo
+.. autoclass:: JointState
+.. autoclass:: LinkState
 
 Robots
 ------

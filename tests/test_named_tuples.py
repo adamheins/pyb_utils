@@ -112,3 +112,57 @@ def test_joint_info():
     info = pyb_utils.getJointInfo(robot.uid, 2, decode=None)
     assert info.jointName != "lbr_iiwa_joint_3"
     assert info.linkName != "lbr_iiwa_link_3"
+
+
+def test_joint_states():
+    pyb.setAdditionalSearchPath(pybullet_data.getDataPath())
+    robot = pyb_utils.Robot(
+        pyb.loadURDF(
+            "kuka_iiwa/model.urdf",
+            [0, 0, 0],
+            useFixedBase=True,
+        )
+    )
+
+
+    state = pyb_utils.getJointState(robot.uid, 2)
+    assert np.isclose(state.jointPosition, 0)
+
+    states = pyb_utils.getJointStates(robot.uid, np.arange(robot.num_joints))
+    assert len(states) == robot.num_joints
+
+
+def test_link_states():
+    pyb.setAdditionalSearchPath(pybullet_data.getDataPath())
+    robot = pyb_utils.Robot(
+        pyb.loadURDF(
+            "kuka_iiwa/model.urdf",
+            [0, 0, 0],
+            useFixedBase=True,
+        )
+    )
+
+    # we get None for velocities when computeLinkVelocity=False
+    state = pyb_utils.getLinkState(robot.uid, 2)
+    assert state.worldLinkLinearVelocity is None
+    assert state.worldLinkAngularVelocity is None
+
+    state = pyb_utils.getLinkState(robot.uid, 2, computeLinkVelocity=True)
+    assert np.allclose(state.worldLinkLinearVelocity, np.zeros(3))
+    assert np.allclose(state.worldLinkAngularVelocity, np.zeros(3))
+
+    # forward kinematics only updated after stepping the sim when
+    # computeForwardKinematics=True
+    for i in range(10):
+        robot.command_velocity(np.ones(7))
+        pyb.stepSimulation()
+
+    state1 = pyb_utils.getLinkState(robot.uid, 2)
+    state2 = pyb_utils.getLinkState(robot.uid, 2, computeForwardKinematics=True)
+    assert not np.allclose(state1.linkWorldPosition, state2.linkWorldPosition)
+    assert not np.allclose(state1.linkWorldOrientation, state2.linkWorldOrientation)
+    assert not np.allclose(state1.worldLinkFramePosition, state2.worldLinkFramePosition)
+    assert not np.allclose(state1.worldLinkFrameOrientation, state2.worldLinkFrameOrientation)
+
+    states = pyb_utils.getLinkStates(robot.uid, np.arange(robot.num_joints))
+    assert len(states) == robot.num_joints

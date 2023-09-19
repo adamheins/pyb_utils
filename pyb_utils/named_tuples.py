@@ -91,6 +91,30 @@ JointInfo = namedtuple(
     ],
 )
 
+JointState = namedtuple(
+    "JointState",
+    [
+        "jointPosition",
+        "jointVelocity",
+        "jointReactionForces",
+        "appliedJointMotorTorque",
+    ],
+)
+
+LinkState = namedtuple(
+    "LinkState",
+    [
+        "linkWorldPosition",
+        "linkWorldOrientation",
+        "localInertialFramePosition",
+        "localInertialFrameOrientation",
+        "worldLinkFramePosition",
+        "worldLinkFrameOrientation",
+        "worldLinkLinearVelocity",
+        "worldLinkAngularVelocity",
+    ],
+)
+
 
 def getDynamicsInfo(bodyUniqueId, linkIndex, physicsClientId=0):
     """Get information about the dynamic properties of a link.
@@ -248,3 +272,152 @@ def getJointInfo(bodyUniqueId, jointIndex, physicsClientId=0, decode=None):
             linkName=info.linkName.decode(decode),
         )
     return info
+
+
+def getJointState(bodyUniqueId, jointIndex, physicsClientId=0):
+    """Get the state of a joint.
+
+    Parameters
+    ----------
+    bodyUniqueId : int
+        UID of the body with the joint.
+    jointIndex : int
+        Index of the joint on the body.
+    physicsClientId : int
+        The UID of the physics server to use.
+
+    Returns
+    -------
+    JointState
+    """
+    return JointState(
+        *pyb.getJointState(
+            bodyUniqueId=bodyUniqueId,
+            jointIndex=jointIndex,
+            physicsClientId=physicsClientId,
+        )
+    )
+
+
+def getJointStates(bodyUniqueId, jointIndices, physicsClientId=0):
+    """Get the state of multiple joints at once.
+
+    Parameters
+    ----------
+    bodyUniqueId : int
+        UID of the body with the joint.
+    jointIndices :
+        List of indices of joints on the body.
+    physicsClientId : int
+        The UID of the physics server to use.
+
+    Returns
+    -------
+    :
+        A list of ``JointState``.
+    """
+    states_raw = pyb.getJointStates(
+        bodyUniqueId=bodyUniqueId,
+        jointIndices=jointIndices,
+        physicsClientId=physicsClientId,
+    )
+    return [JointState(*state) for state in states_raw]
+
+
+def getLinkState(
+    bodyUniqueId,
+    linkIndex,
+    computeLinkVelocity=False,
+    computeForwardKinematics=False,
+    physicsClientId=0,
+):
+    """Get the state of a link.
+
+    One difference from the PyBullet API is that if
+    ``computeLinkVelocity=False``, we still return the
+    ``worldLinkLinearVelocity`` and ``worldLinkAngularVelocity`` fields, but
+    they are set to ``None``. PyBullet just doesn't return the fields, such
+    that the tuple has 6 fields rather than 8.
+
+    Parameters
+    ----------
+    bodyUniqueId : int
+        UID of the body with the link.
+    linkIndex : int
+        Index of the link on the body. Note that the link index corresponds to
+        the index of its parent joint.
+    computeLinkVelocity : bool
+        If ``True``, compute the velocity of the link's CoM in the world frame.
+        Otherwise, these fields are set to ``None``.
+    computeForwardKinematics : bool
+        If ``True``, update the position and orientation of the link in the
+        world frame. Otherwise, the position and orientation will not be up to
+        date if the simulation has been stepped.
+    physicsClientId : int
+        The UID of the physics server to use.
+
+    Returns
+    -------
+    LinkState
+    """
+    state_raw = pyb.getLinkState(
+            bodyUniqueId=bodyUniqueId,
+            linkIndex=linkIndex,
+            computeLinkVelocity=computeLinkVelocity,
+            computeForwardKinematics=computeForwardKinematics,
+            physicsClientId=physicsClientId,
+        )
+    # pybullet just returns a smaller tuple when link velocity is not computed;
+    # we instead keep it the same size but set velocity fields to None
+    if not computeLinkVelocity:
+        state_raw = state_raw + (None, None)
+    return LinkState(*state_raw)
+
+
+def getLinkStates(
+    bodyUniqueId,
+    linkIndices,
+    computeLinkVelocity=False,
+    computeForwardKinematics=False,
+    physicsClientId=0,
+):
+    """Get the state of multiple links at once.
+
+    One difference from the PyBullet API is that if
+    ``computeLinkVelocity=False``, we still return the
+    ``worldLinkLinearVelocity`` and ``worldLinkAngularVelocity`` fields, but
+    they are set to ``None``. PyBullet just doesn't return the fields, such
+    that the tuple has 6 fields rather than 8.
+
+    Parameters
+    ----------
+    bodyUniqueId : int
+        UID of the body with the link.
+    linkIndices :
+        List of indices of the link on the body. Note that the link index
+        corresponds to the index of its parent joint.
+    computeLinkVelocity : bool
+        If ``True``, compute the velocity of the link's CoM in the world frame.
+        Otherwise, these fields are set to ``None``.
+    computeForwardKinematics : bool
+        If ``True``, update the position and orientation of the link in the
+        world frame. Otherwise, the position and orientation will not be up to
+        date if the simulation has been stepped.
+    physicsClientId : int
+        The UID of the physics server to use.
+
+    Returns
+    -------
+    :
+        List of ``LinkState``.
+    """
+    states_raw = pyb.getLinkStates(
+        bodyUniqueId=bodyUniqueId,
+        linkIndices=linkIndices,
+        computeLinkVelocity=computeLinkVelocity,
+        computeForwardKinematics=computeForwardKinematics,
+        physicsClientId=physicsClientId,
+    )
+    if not computeLinkVelocity:
+        states_raw = [s + (None, None) for s in states_raw]
+    return [LinkState(*state) for state in states_raw]
