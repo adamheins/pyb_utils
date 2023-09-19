@@ -133,10 +133,7 @@ class Robot:
         )
 
     def get_link_com_velocity(self, link_idx=None):
-        """Get the velocity of a link's center of mass.
-
-        The velocity is computed about the link's center of mass with respect
-        to the world frame.
+        """Get the velocity of a link's center of mass with respect to the world.
 
         Parameters
         ----------
@@ -162,6 +159,20 @@ class Robot:
         return v_com, ω_com
 
     def get_link_frame_velocity(self, link_idx=None):
+        """Get the velocity of a link's URDF frame with respect to the world.
+
+        Parameters
+        ----------
+        link_idx :
+            Index of the link to use. If not provided, defaults to the end
+            effector ``self.tool_idx``.
+
+        Returns
+        -------
+        :
+            A tuple containing the linear and angular velocity vectors for the
+            link's URDF frame with respect to the world.
+        """
         if link_idx is None:
             link_idx = self.tool_idx
         state = getLinkState(

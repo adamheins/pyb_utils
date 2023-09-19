@@ -117,10 +117,15 @@ example:
 (0.0, 0.0, 0.0)
 ```
 The functions we've wrapped in this way are `getClosestPoints`,
-`getConstraintInfo`, `getContactPoints`, `getDynamicsInfo`, and `getJointInfo`.
-The one difference from the PyBullet API is that in pyb_utils `getJointInfo`
-also accepts an optional argument `decode`, which will convert the byte strings
+`getConstraintInfo`, `getContactPoints`, `getDynamicsInfo`, `getJointInfo`,
+`getJointState(s)`, and `getLinkState(s)`. There are two differences from the
+vanilla PyBullet API. The first is that in pyb_utils `getJointInfo` also
+accepts an optional argument `decode`, which will convert the byte strings
 returned by PyBullet to the specifed encoding. For example, `decode="utf8"`.
+The second difference is that in pyb_utils `getLinkState(s)` will always return
+`LinkState` tuples with 8 fields, even if `computeLinkVelocity=False`. When
+`computeLinkVelocity=False`, then `worldLinkLinearVelocity` and
+`worldLinkAngularVelocity` are both set to `None`.
 
 And there's more! You can find example scripts of all of this package's
 utilities in the `examples/` directory:
