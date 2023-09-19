@@ -3,7 +3,6 @@ import pybullet as pyb
 import pybullet_data
 from spatialmath.base import rotz
 import pyb_utils
-import pinocchio
 
 
 def setup_function():
