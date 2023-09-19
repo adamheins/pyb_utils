@@ -2,7 +2,8 @@
 import numpy as np
 import pybullet as pyb
 
-from .named_tuples import getJointInfo
+from .named_tuples import getJointInfo, getJointStates, getLinkState
+from .math import quaternion_to_matrix
 
 
 class Robot:
@@ -43,9 +44,9 @@ class Robot:
             A tuple ``(q, v)`` where ``q`` is the robot's joint configuration
             and ``v`` is the joint velocity.
         """
-        states = pyb.getJointStates(self.uid, self._joint_indices)
-        q = np.array([state[0] for state in states])
-        v = np.array([state[1] for state in states])
+        states = getJointStates(self.uid, self._joint_indices)
+        q = np.array([state.jointPosition for state in states])
+        v = np.array([state.jointVelocity for state in states])
         return q, v
 
     def reset_joint_configuration(self, q):
@@ -79,11 +80,11 @@ class Robot:
             targetVelocities=list(u),
         )
 
-    def get_link_pose(self, link_idx=None):
-        """Get the pose of a link.
+    def get_link_com_pose(self, link_idx=None):
+        """Get the pose of a link's center of mass.
 
-        The pose is computed about the link's CoM with respect to the world
-        frame.
+        The pose is computed about the link's center of mass with respect to
+        the world frame.
 
         Parameters
         ----------
@@ -100,15 +101,42 @@ class Robot:
         """
         if link_idx is None:
             link_idx = self.tool_idx
-        state = pyb.getLinkState(self.uid, link_idx, computeForwardKinematics=True)
-        pos, orn = state[4], state[5]
-        return np.array(pos), np.array(orn)
+        state = getLinkState(self.uid, link_idx, computeForwardKinematics=True)
+        return np.array(state.linkWorldPosition), np.array(
+            state.linkWorldOrientation
+        )
 
-    def get_link_velocity(self, link_idx=None):
-        """Get the velocity of a link.
+    def get_link_frame_pose(self, link_idx=None):
+        """Get the pose of a link's URDF frame.
 
-        The velocity is computed about the link's CoM with respect to the world
-        frame.
+        The pose is computed about the link's parent joint position, which is
+        its URDF frame.
+
+        Parameters
+        ----------
+        link_idx :
+            Index of the link to use. If not provided, defaults to the end
+            effector ``self.tool_idx``.
+
+        Returns
+        -------
+        :
+            A tuple containing the position and orientation quaternion of the
+            link's frame with respect to the world. The quaternion is
+            represented in xyzw order.
+        """
+        if link_idx is None:
+            link_idx = self.tool_idx
+        state = getLinkState(self.uid, link_idx, computeForwardKinematics=True)
+        return np.array(state.worldLinkFramePosition), np.array(
+            state.worldLinkFrameOrientation
+        )
+
+    def get_link_com_velocity(self, link_idx=None):
+        """Get the velocity of a link's center of mass.
+
+        The velocity is computed about the link's center of mass with respect
+        to the world frame.
 
         Parameters
         ----------
@@ -124,25 +152,36 @@ class Robot:
         """
         if link_idx is None:
             link_idx = self.tool_idx
-        state = pyb.getLinkState(
+        state = getLinkState(
             self.uid,
             link_idx,
             computeLinkVelocity=True,
         )
-        return np.array(state[-2]), np.array(state[-1])
+        v_com = np.array(state.worldLinkLinearVelocity)
+        ω_com = np.array(state.worldLinkAngularVelocity)
+        return v_com, ω_com
 
-    def jacobian(self, q=None, link_idx=None, offset=None):
+    def get_link_frame_velocity(self, link_idx=None):
+        if link_idx is None:
+            link_idx = self.tool_idx
+        state = getLinkState(
+            self.uid,
+            link_idx,
+            computeLinkVelocity=True,
+            computeForwardKinematics=True,
+        )
+        C = quaternion_to_matrix(state.worldLinkFrameOrientation)
+        v_com = np.array(state.worldLinkLinearVelocity)
+        ω_com = np.array(state.worldLinkAngularVelocity)
+        v = v_com - np.cross(ω_com, C @ state.localInertialFramePosition)
+        ω = ω_com
+        return v, ω
+
+    def compute_link_jacobian(self, q=None, link_idx=None, offset=None):
         """Get the Jacobian of a point on a link at the given configuration.
 
-        Warning
-        -------
-        The Jacobian is computed around the link's parent joint position,
-        whereas ``get_link_pose`` and ``get_link_velocity`` compute the pose
-        and velocity around the link's center of mass (CoM). To compute the
-        Jacobian around the CoM, pass in the ``offset`` of the CoM from the
-        joint position in the local frame. Alternatively, it may be convenient
-        to simply design your URDF so that the CoM of the link of interest
-        coincides with the joint origin.
+        When ``offset`` is ``None`` or zeros, the Jacobian is computed around
+        the URDF link frame (i.e., the parent joint position).
 
         See also
         https://github.com/bulletphysics/bullet3/issues/2429#issuecomment-538431246.
@@ -180,3 +219,51 @@ class Robot:
         Jv, Jw = pyb.calculateJacobian(self.uid, link_idx, offset, q, z, z)
         J = np.vstack((Jv, Jw))
         return J
+
+    def compute_link_frame_jacobian(self, q=None, link_idx=None):
+        """Compute the Jacobian around the URDF link frame.
+
+        This is the same as calling ``compute_link_jacobian`` with
+        ``offset=None``.
+
+        Parameters
+        ----------
+        q :
+            The joint configuration at which to compute the Jacobian. If no
+            configuration is given, then the current one is used.
+        link_idx :
+            The index of the link to compute the Jacobian for. The end effector
+            link ``self.tool_idx`` is used if not given.
+
+        Returns
+        -------
+        :
+            The :math:`6\\times n` Jacobian matrix, where :math:`n` is the
+            number of joints.
+        """
+        return self.compute_link_jacobian(q=q, link_idx=link_idx, offset=None)
+
+    def compute_link_com_jacobian(self, q=None, link_idx=None):
+        """Compute the Jacobian around the link's center of mass.
+
+        Parameters
+        ----------
+        q :
+            The joint configuration at which to compute the Jacobian. If no
+            configuration is given, then the current one is used.
+        link_idx :
+            The index of the link to compute the Jacobian for. The end effector
+            link ``self.tool_idx`` is used if not given.
+
+        Returns
+        -------
+        :
+            The :math:`6\\times n` Jacobian matrix, where :math:`n` is the
+            number of joints.
+        """
+        if link_idx is None:
+            link_idx = self.tool_idx
+        state = getLinkState(self.uid, link_idx)
+        return self.compute_link_jacobian(
+            q=q, link_idx=link_idx, offset=state.localInertialFramePosition
+        )
