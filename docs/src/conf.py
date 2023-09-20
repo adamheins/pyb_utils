@@ -120,7 +120,7 @@ latex_elements = {
 
     # Additional stuff for the LaTeX preamble.
     #
-    # 'preamble': '',
+    # 'preamble': ''
 
     # Latex figure (float) alignment
     #

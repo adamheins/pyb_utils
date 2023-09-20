@@ -84,7 +84,27 @@ class Robot:
         """Get the pose of a link's center of mass.
 
         The pose is computed about the link's center of mass with respect to
-        the world frame.
+        the world frame and expressed in the world frame.
+
+        Let :math:`\mathcal{F}_w` be the world frame, :math:`\mathcal{F}_f` be
+        the link's URDF frame, and let :math:`\mathcal{F}_c` be the link's CoM
+        frame. This function returns the position :math:`\mathbf{r}^{cw}_w` and
+        orientation quaternion :math:`\mathbf{Q}_{wc}`. The relationship
+        between :math:`(\mathbf{r}^{cw}_w,\mathbf{Q}_{wc})` from this function
+        and :math:`(\mathbf{r}^{fw}_w,\mathbf{Q}_{wf})` from
+        :meth:`get_link_frame_pose` is
+
+        .. math::
+           \mathbf{r}^{cw}_w &= \mathbf{r}^{fw}_w + \mathbf{C}_{wf}\mathbf{r}^{cf}_f \\\\
+           \mathbf{Q}_{wc} &= \mathbf{Q}_{wf} \otimes \mathbf{Q}_{fc},
+
+        where :math:`\mathbf{C}_{wf}` is the rotation matrix representing the
+        same rotation as :math:`\mathbf{Q}_{wf}`, and :math:`\mathbf{r}^{cf}_f`
+        and :math:`\mathbf{Q}_{fc}` are the position and quaternion from
+        ``LinkState.localInertialFramePosition`` and
+        ``LinkState.localInertialFrameOrientation``, respectively, obtained
+        from a call to :func:`pyb_utils.named_tuples.getLinkState`. The symbol
+        :math:`\otimes` refers to Hamilton/quaternion multiplication.
 
         Parameters
         ----------
@@ -134,6 +154,20 @@ class Robot:
 
     def get_link_com_velocity(self, link_idx=None):
         """Get the velocity of a link's center of mass with respect to the world.
+
+        With reference to the documentation of :meth:`get_link_com_pose`, the
+        relationship between the CoM velocity
+        :math:`(\\boldsymbol{v}^{cw}_w,\\boldsymbol{\omega}^{cw}_w)` from this
+        function and
+        :math:`(\\boldsymbol{v}^{fw}_w,\\boldsymbol{\omega}^{fw}_w)` from
+        :meth:`get_link_frame_velocity` is
+
+        .. math::
+           \\boldsymbol{v}^{cw}_w &= \\boldsymbol{v}^{fw}_w + \\boldsymbol{\omega}^{fw}_w\\times\\boldsymbol{C}_{wf}\\boldsymbol{r}^{cf}_f \\\\
+           \\boldsymbol{\omega}^{cw}_w &= \\boldsymbol{\omega}^{fw}_w,
+
+        where :math:`\\times` denotes the cross product.
+
 
         Parameters
         ----------
