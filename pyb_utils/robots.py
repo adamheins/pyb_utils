@@ -88,19 +88,19 @@ class Robot:
 
         Let :math:`\mathcal{F}_w` be the world frame, :math:`\mathcal{F}_f` be
         the link's URDF frame, and let :math:`\mathcal{F}_c` be the link's CoM
-        frame. This function returns the position :math:`\mathbf{r}^{cw}_w` and
-        orientation quaternion :math:`\mathbf{Q}_{wc}`. The relationship
-        between :math:`(\mathbf{r}^{cw}_w,\mathbf{Q}_{wc})` from this function
-        and :math:`(\mathbf{r}^{fw}_w,\mathbf{Q}_{wf})` from
+        frame. This function returns the position :math:`\\boldsymbol{r}^{cw}_w` and
+        orientation quaternion :math:`\\boldsymbol{Q}_{wc}`. The relationship
+        between :math:`(\\boldsymbol{r}^{cw}_w,\\boldsymbol{Q}_{wc})` from this function
+        and :math:`(\\boldsymbol{r}^{fw}_w,\\boldsymbol{Q}_{wf})` from
         :meth:`get_link_frame_pose` is
 
         .. math::
-           \mathbf{r}^{cw}_w &= \mathbf{r}^{fw}_w + \mathbf{C}_{wf}\mathbf{r}^{cf}_f \\\\
-           \mathbf{Q}_{wc} &= \mathbf{Q}_{wf} \otimes \mathbf{Q}_{fc},
+           \\boldsymbol{r}^{cw}_w &= \\boldsymbol{r}^{fw}_w + \\boldsymbol{C}_{wf}\\boldsymbol{r}^{cf}_f \\\\
+           \\boldsymbol{Q}_{wc} &= \\boldsymbol{Q}_{wf} \otimes \\boldsymbol{Q}_{fc},
 
-        where :math:`\mathbf{C}_{wf}` is the rotation matrix representing the
-        same rotation as :math:`\mathbf{Q}_{wf}`, and :math:`\mathbf{r}^{cf}_f`
-        and :math:`\mathbf{Q}_{fc}` are the position and quaternion from
+        where :math:`\\boldsymbol{C}_{wf}` is the rotation matrix representing the
+        same rotation as :math:`\\boldsymbol{Q}_{wf}`, and :math:`\\boldsymbol{r}^{cf}_f`
+        and :math:`\\boldsymbol{Q}_{fc}` are the position and quaternion from
         ``LinkState.localInertialFramePosition`` and
         ``LinkState.localInertialFrameOrientation``, respectively, obtained
         from a call to :func:`pyb_utils.named_tuples.getLinkState`. The symbol
