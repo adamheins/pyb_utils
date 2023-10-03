@@ -21,7 +21,8 @@ class Robot:
         The number of actuated (i.e., controlled) joints. This should never be
         more than `num_joints`.
     tool_idx : int
-        The index of the tool joint.
+        The index of the tool joint. Note that this corresponds to the tool
+        link, since each link has the same index as its parent joint.
 
     Parameters
     ----------
@@ -48,15 +49,19 @@ class Robot:
 
         n = pyb.getNumJoints(uid)
 
-        # first build a dict of the non-fixed joints' info
-        self._joint_indices = []
+        # build a dict of all joint info
         joint_info = {}
         for i in range(n):
             info = getJointInfo(uid, i, decode="utf-8")
+            joint_info[info.jointName] = info
+
+        # record indices of all non-fixed joints
+        self._joint_indices = []
+        for name in joint_info:
+            info = joint_info[name]
             if info.jointType == pyb.JOINT_FIXED:
                 continue
-            joint_info[info.jointName] = info
-            self._joint_indices.append(i)
+            self._joint_indices.append(info.jointIndex)
         self.num_joints = len(self._joint_indices)
 
         if actuated_joints is None:
@@ -173,7 +178,7 @@ class Robot:
             forces=list(u),
         )
 
-    def get_link_com_pose(self, link_idx=None):
+    def get_link_com_pose(self, link_idx=None, as_rotation_matrix=False):
         """Get the pose of a link's center of mass.
 
         The pose is computed about the link's center of mass with respect to
@@ -204,22 +209,29 @@ class Robot:
         link_idx :
             Index of the link to use. If not provided, defaults to the end
             effector ``self.tool_idx``.
+        as_rotation_matrix : bool
+            Set to ``True`` to return the orientation as a rotation matrix,
+            ``False`` to return a quaternion.
 
         Returns
         -------
         :
-            A tuple containing the position and orientation quaternion of the
-            link's center of mass in the world frame. The quaternion is
-            represented in xyzw order.
+            A tuple containing the position and orientation of the link's
+            center of mass in the world frame. If ``as_rotation_matrix=True``,
+            then the orientation is represented as a :math:`3\\times3` rotation
+            matrix. If ``False``, then it is represented as a quaternion in
+            xyzw order.
         """
         if link_idx is None:
             link_idx = self.tool_idx
         state = getLinkState(self.uid, link_idx, computeForwardKinematics=True)
-        return np.array(state.linkWorldPosition), np.array(
-            state.linkWorldOrientation
-        )
+        position = np.array(state.linkWorldPosition)
+        orientation = np.array(state.linkWorldOrientation)
+        if as_rotation_matrix:
+            orientation = quaternion_to_matrix(orientation)
+        return position, orientation
 
-    def get_link_frame_pose(self, link_idx=None):
+    def get_link_frame_pose(self, link_idx=None, as_rotation_matrix=False):
         """Get the pose of a link's URDF frame.
 
         The pose is computed about the link's parent joint position, which is
@@ -230,20 +242,26 @@ class Robot:
         link_idx :
             Index of the link to use. If not provided, defaults to the end
             effector ``self.tool_idx``.
+        as_rotation_matrix : bool
+            Set to ``True`` to return the orientation as a rotation matrix,
+            ``False`` to return a quaternion.
 
         Returns
         -------
         :
-            A tuple containing the position and orientation quaternion of the
-            link's frame with respect to the world. The quaternion is
-            represented in xyzw order.
+            A tuple containing the position and orientation of the link's frame
+            with respect to the world. If ``as_rotation_matrix=True``, then the
+            orientation is represented as a :math:`3\\times3` rotation matrix.
+            If ``False``, then it is represented as a quaternion in xyzw order.
         """
         if link_idx is None:
             link_idx = self.tool_idx
         state = getLinkState(self.uid, link_idx, computeForwardKinematics=True)
-        return np.array(state.worldLinkFramePosition), np.array(
-            state.worldLinkFrameOrientation
-        )
+        position = np.array(state.worldLinkFramePosition)
+        orientation = np.array(state.worldLinkFrameOrientation)
+        if as_rotation_matrix:
+            orientation = quaternion_to_matrix(orientation)
+        return position, orientation
 
     def get_link_com_velocity(self, link_idx=None):
         """Get the velocity of a link's center of mass with respect to the world.

@@ -97,8 +97,10 @@ def test_robot_link_pose():
     robot.reset_joint_configuration([np.pi / 2, 0, 0, 0, 0, 0, 0])
     r1, Q1 = robot.get_link_frame_pose()
     C1 = pyb_utils.quaternion_to_matrix(Q1)
+    C1_0 = robot.get_link_frame_pose(as_rotation_matrix=True)[1]
     assert np.allclose(r0, r1)
     assert np.allclose(Q1, pyb_utils.quaternion_multiply(Qz, Q0))
+    assert np.allclose(C1, C1_0)
 
     r1_com = robot.get_link_com_pose()[0]
     assert np.allclose(r1_com, r1 + C1 @ offset)
