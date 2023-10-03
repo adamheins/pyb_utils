@@ -1,4 +1,5 @@
-"""This module provides a simple wrapper for a velocity-controlled robot."""
+"""This module provides a simple wrapper for a velocity- or torque-controlled
+robot."""
 import numpy as np
 import pybullet as pyb
 
@@ -9,30 +10,69 @@ from .math import quaternion_to_matrix
 class Robot:
     """Wrapper for a PyBullet robot.
 
+    Attributes
+    ----------
+    uid : int
+        The unique ID of the underlying PyBullet robot body.
+    num_joints : int
+        The total number of joints (only moveable joints are included; fixed
+        joints are not).
+    num_actuated_joints : int
+        The number of actuated (i.e., controlled) joints. This should never be
+        more than `num_joints`.
+    tool_idx : int
+        The index of the tool joint.
+
     Parameters
     ----------
     uid : int
         The UID of the body representing the robot.
-    tool_joint_name :
-        If supplied, use the child link of this joint as the end effector. If
+    tool_joint_name : str
+        If provided, use the child link of this joint as the end effector. If
         it is ``None``, then the link corresponding to the last joint is used.
+    actuated_joints : iterable
+        An optional list of actuated joint names. These joints will be
+        "actuated", in that they take commands from the ``command_`` methods.
+        If not provided, all moveable joints are considered actuated. To have a
+        free-moving joint (whether actuated or not), see
+        :meth:`set_joint_friction_forces`.
     """
 
-    def __init__(self, uid, tool_joint_name=None):
+    def __init__(
+        self,
+        uid,
+        tool_joint_name=None,
+        actuated_joints=None,
+    ):
         self.uid = uid
-        self.num_joints = pyb.getNumJoints(uid)
-        self._joint_indices = list(range(self.num_joints))
+
+        n = pyb.getNumJoints(uid)
+
+        # first build a dict of the non-fixed joints' info
+        self._joint_indices = []
+        joint_info = {}
+        for i in range(n):
+            info = getJointInfo(uid, i, decode="utf-8")
+            if info.jointType == pyb.JOINT_FIXED:
+                continue
+            joint_info[info.jointName] = info
+            self._joint_indices.append(i)
+        self.num_joints = len(self._joint_indices)
+
+        if actuated_joints is None:
+            self._actuated_joint_indices = self._joint_indices
+        else:
+            self._actuated_joint_indices = [
+                joint_info[name].jointIndex for name in actuated_joints
+            ]
+        self.num_actuated_joints = len(self._actuated_joint_indices)
 
         if tool_joint_name is None:
-            self.tool_idx = self._joint_indices[-1]
+            self.tool_idx = n - 1
         else:
-            self.tool_idx = None
-            for i in range(self.num_joints):
-                info = getJointInfo(self.uid, i, decode="utf-8")
-                if info.jointName == tool_joint_name:
-                    self.tool_idx = info.jointIndex
-                    break
-            if self.tool_idx is None:
+            try:
+                self.tool_idx = joint_info[tool_joint_name].jointIndex
+            except KeyError:
                 raise ValueError(f"No joint with name {tool_joint_name} found.")
 
     def get_joint_states(self):
@@ -64,6 +104,36 @@ class Robot:
         for idx, angle in zip(self._joint_indices, q):
             pyb.resetJointState(self.uid, idx, angle)
 
+    def set_joint_friction_forces(self, forces, joint_indices=None):
+        """Set the friction forces at each joint.
+
+        Set the force to a small value (or zero) to have free-moving joints.
+
+        Parameters
+        ----------
+        forces : iterable
+            The friction forces for the specified joints.
+        joint_indices : iterable
+            An optional list of joint indices to specify forces for. If not
+            provided, then it is assumed forces are being provided for all
+            joints.
+        """
+
+        if joint_indices is None:
+            joint_indices = self._joint_indices
+
+        assert len(forces) == len(
+            joint_indices
+        ), f"Number of friction forces does not match number of joints."
+
+        pyb.setJointMotorControlArray(
+            self.uid,
+            joint_indices,
+            controlMode=pyb.VELOCITY_CONTROL,
+            targetVelocities=list(np.zeros_like(forces)),
+            forces=forces,
+        )
+
     def command_velocity(self, u):
         """Send a joint velocity command to the robot.
 
@@ -71,13 +141,36 @@ class Robot:
         ----------
         u : iterable
             The joint velocity to command. Must be of length
-            ``self.num_joints``.
+            ``self.num_actuated_joints``.
         """
+        assert (
+            len(u) == self.num_actuated_joints
+        ), f"Command length does not match number of actuated joints."
         pyb.setJointMotorControlArray(
             self.uid,
-            self._joint_indices,
+            self._actuated_joint_indices,
             controlMode=pyb.VELOCITY_CONTROL,
             targetVelocities=list(u),
+        )
+
+    def command_effort(self, u):
+        """Send a joint effort (force/torque) command to the robot.
+
+        Parameters
+        ----------
+        u : iterable
+            The joint effort to command. Must be of length
+            ``self.num_actuated_joints``.
+        """
+        assert (
+            len(u) == self.num_actuated_joints
+        ), f"Command length does not match number of actuated joints."
+
+        pyb.setJointMotorControlArray(
+            self.uid,
+            self._actuated_joint_indices,
+            controlMode=pyb.TORQUE_CONTROL,
+            forces=list(u),
         )
 
     def get_link_com_pose(self, link_idx=None):
@@ -86,8 +179,8 @@ class Robot:
         The pose is computed about the link's center of mass with respect to
         the world frame and expressed in the world frame.
 
-        Let :math:`\mathcal{F}_w` be the world frame, :math:`\mathcal{F}_f` be
-        the link's URDF frame, and let :math:`\mathcal{F}_c` be the link's CoM
+        Let :math:`\\mathcal{F}_w` be the world frame, :math:`\\mathcal{F}_f` be
+        the link's URDF frame, and let :math:`\\mathcal{F}_c` be the link's CoM
         frame. This function returns the position :math:`\\boldsymbol{r}^{cw}_w` and
         orientation quaternion :math:`\\boldsymbol{Q}_{wc}`. The relationship
         between :math:`(\\boldsymbol{r}^{cw}_w,\\boldsymbol{Q}_{wc})` from this function
@@ -96,7 +189,7 @@ class Robot:
 
         .. math::
            \\boldsymbol{r}^{cw}_w &= \\boldsymbol{r}^{fw}_w + \\boldsymbol{C}_{wf}\\boldsymbol{r}^{cf}_f \\\\
-           \\boldsymbol{Q}_{wc} &= \\boldsymbol{Q}_{wf} \otimes \\boldsymbol{Q}_{fc},
+           \\boldsymbol{Q}_{wc} &= \\boldsymbol{Q}_{wf} \\otimes \\boldsymbol{Q}_{fc},
 
         where :math:`\\boldsymbol{C}_{wf}` is the rotation matrix representing the
         same rotation as :math:`\\boldsymbol{Q}_{wf}`, and :math:`\\boldsymbol{r}^{cf}_f`
@@ -104,7 +197,7 @@ class Robot:
         ``LinkState.localInertialFramePosition`` and
         ``LinkState.localInertialFrameOrientation``, respectively, obtained
         from a call to :func:`pyb_utils.named_tuples.getLinkState`. The symbol
-        :math:`\otimes` refers to Hamilton/quaternion multiplication.
+        :math:`\\otimes` refers to Hamilton/quaternion multiplication.
 
         Parameters
         ----------
@@ -157,14 +250,14 @@ class Robot:
 
         With reference to the documentation of :meth:`get_link_com_pose`, the
         relationship between the CoM velocity
-        :math:`(\\boldsymbol{v}^{cw}_w,\\boldsymbol{\omega}^{cw}_w)` from this
+        :math:`(\\boldsymbol{v}^{cw}_w,\\boldsymbol{\\omega}^{cw}_w)` from this
         function and
-        :math:`(\\boldsymbol{v}^{fw}_w,\\boldsymbol{\omega}^{fw}_w)` from
+        :math:`(\\boldsymbol{v}^{fw}_w,\\boldsymbol{\\omega}^{fw}_w)` from
         :meth:`get_link_frame_velocity` is
 
         .. math::
-           \\boldsymbol{v}^{cw}_w &= \\boldsymbol{v}^{fw}_w + \\boldsymbol{\omega}^{fw}_w\\times\\boldsymbol{C}_{wf}\\boldsymbol{r}^{cf}_f \\\\
-           \\boldsymbol{\omega}^{cw}_w &= \\boldsymbol{\omega}^{fw}_w,
+           \\boldsymbol{v}^{cw}_w &= \\boldsymbol{v}^{fw}_w + \\boldsymbol{\\omega}^{fw}_w\\times\\boldsymbol{C}_{wf}\\boldsymbol{r}^{cf}_f \\\\
+           \\boldsymbol{\\omega}^{cw}_w &= \\boldsymbol{\\omega}^{fw}_w,
 
         where :math:`\\times` denotes the cross product.
 

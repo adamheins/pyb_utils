@@ -24,17 +24,27 @@ def test_robot_setup():
 
     robot1 = pyb_utils.Robot(kuka_id)
     assert robot1.num_joints == 7
+    assert robot1.num_actuated_joints == robot1.num_joints
     assert robot1.tool_idx == robot1.num_joints - 1
 
     # specify the tool joint by name
     robot2 = pyb_utils.Robot(kuka_id, tool_joint_name="lbr_iiwa_joint_7")
     assert robot2.num_joints == 7
+    assert robot2.num_actuated_joints == robot2.num_joints
     assert robot2.tool_idx == robot2.num_joints - 1
 
     # set tool as something other than last joint/link
     robot3 = pyb_utils.Robot(kuka_id, tool_joint_name="lbr_iiwa_joint_6")
     assert robot3.num_joints == 7
+    assert robot3.num_actuated_joints == robot3.num_joints
     assert robot3.tool_idx == robot3.num_joints - 2
+
+    # reduced number of actuated joints
+    robot4 = pyb_utils.Robot(
+        kuka_id, actuated_joints=[f"lbr_iiwa_joint_{i+1}" for i in range(5)]
+    )
+    assert robot4.num_joints == 7
+    assert robot4.num_actuated_joints == 5
 
 
 def test_robot_joint_states():
@@ -145,3 +155,16 @@ def test_robot_jacobian():
     V = np.concatenate(robot.get_link_com_velocity())
     v = robot.get_joint_states()[1]
     assert np.allclose(V, J @ v, rtol=0, atol=1e-2)
+
+
+def test_robot_joint_effort():
+    # NOTE: no explicit assertions in this test (yet); right now it just
+    # ensures that these functions can be called
+    kuka_id = pyb.loadURDF(
+        "kuka_iiwa/model.urdf",
+        [0, 0, 0],
+        useFixedBase=True,
+    )
+    robot = pyb_utils.Robot(kuka_id)
+    robot.set_joint_friction_forces(np.zeros(robot.num_joints))
+    robot.command_effort(np.ones(robot.num_joints))

@@ -71,3 +71,10 @@ Robots
 .. automodule:: pyb_utils.robots
     :members:
     :undoc-members:
+
+Utils
+-----
+
+.. automodule:: pyb_utils.utils
+    :members:
+    :undoc-members:

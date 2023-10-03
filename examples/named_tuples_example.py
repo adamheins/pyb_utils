@@ -36,7 +36,9 @@ def main():
     # closest points
     ball = pyb_utils.BulletBody.sphere([2, 0, 0.5], radius=0.5)
     pts = pyb_utils.getClosestPoints(box.uid, ball.uid, distance=5)
-    print(f"Distance between box and ball = {np.min([pt.contactDistance for pt in pts])}")
+    print(
+        f"Distance between box and ball = {np.min([pt.contactDistance for pt in pts])}"
+    )
 
     # constraint info
     constraint_id = pyb.createConstraint(
@@ -50,8 +52,9 @@ def main():
         childFramePosition=[2, 0, 0.5],  # fix to this position in world frame
     )
     info = pyb_utils.getConstraintInfo(constraint_id)
-    print(f"Ball fixed at position {info.jointPivotInChild} in the world frame.")
-
+    print(
+        f"Ball fixed at position {info.jointPivotInChild} in the world frame."
+    )
 
 
 if __name__ == "__main__":

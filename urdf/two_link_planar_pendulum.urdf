@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<!-- URDF for a 2-link pendulum that swings along the x-axis. -->
+<robot name="two_link_planar_pendulum">
+  <material name="black">
+    <color rgba="0 0 0 1"/>
+  </material>
+  <material name="red">
+    <color rgba="1 0 0 1"/>
+  </material>
+
+  <link name="base">
+    <visual>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="100"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="0" ixy="0.0" ixz="0.0" iyy="0" iyz="0.0" izz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="shaft1_joint" type="continuous">
+    <axis xyz="1 0 0"/>
+    <parent link="base"/>
+    <child link="shaft1"/>
+    <limit effort="0" velocity="50"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+
+  <link name="shaft1">
+    <visual>
+      <geometry>
+        <cylinder length="0.5" radius="0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 -0.25"/>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.5" radius="0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 -0.25"/>
+    </collision>
+    <inertial>
+      <mass value="0.01"/>
+      <origin rpy="0 0 0" xyz="0 0 -0.25"/>
+      <inertia ixx="0" ixy="0.0" ixz="0.0" iyy="0" iyz="0.0" izz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="bob1_joint" type="fixed">
+    <parent link="shaft1"/>
+    <child link="bob1"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.5"/>
+  </joint>
+
+  <link name="bob1">
+    <visual>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+    </inertial>
+  </link>
+
+  <joint name="shaft2_joint" type="continuous">
+    <axis xyz="1 0 0"/>
+    <parent link="bob1"/>
+    <child link="shaft2"/>
+    <!-- <limit effort="0" lower="-10" upper="10" velocity="50"/> -->
+    <limit effort="0" velocity="0"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+
+  <link name="shaft2">
+    <visual>
+      <geometry>
+        <cylinder length="0.5" radius="0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 -0.25"/>
+      <material name="black"/>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder length="0.5" radius="0.01"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 -0.25"/>
+    </collision>
+    <inertial>
+      <mass value="0.01"/>
+      <origin rpy="0 0 0" xyz="0 0 -0.25"/>
+      <inertia ixx="0" ixy="0.0" ixz="0.0" iyy="0" iyz="0.0" izz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="bob2_joint" type="fixed">
+    <parent link="shaft2"/>
+    <child link="bob2"/>
+    <origin rpy="0 0 0" xyz="0 0 -0.5"/>
+  </joint>
+
+  <link name="bob2">
+    <visual>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <material name="red"/>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="1"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <inertia ixx="1" ixy="0.0" ixz="0.0" iyy="1" iyz="0.0" izz="1"/>
+    </inertial>
+  </link>
+
+</robot>
