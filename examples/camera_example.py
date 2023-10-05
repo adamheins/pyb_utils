@@ -55,7 +55,7 @@ def main():
     points = camera.get_point_cloud(depth=depth)
 
     # just get points on the robot
-    mask = (seg == bodies["robot"]).T
+    mask = (seg == bodies["robot"])
     points = points[mask, :]
 
     fig = plt.figure()
@@ -67,9 +67,7 @@ def main():
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("z")
-    ax.set_xlim([-0.5, 0.5])
-    ax.set_ylim([-0.5, 0.5])
-    ax.set_zlim([0.3, 1.3])
+    ax.set_aspect("equal")
     plt.show()
 
 
