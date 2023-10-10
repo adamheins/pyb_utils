@@ -2,6 +2,8 @@
 import pybullet as pyb
 import numpy as np
 
+from .math import quaternion_to_matrix
+
 
 class BulletBody:
     """Generic rigid body in PyBullet.
@@ -190,19 +192,32 @@ class BulletBody:
             position, collision_uid, visual_uid, client_id=client_id, **kwargs
         )
 
-    def get_pose(self):
+    def get_pose(self, as_rotation_matrix=False):
         """Get the position and orientation of the body.
+
+        Parameters
+        ----------
+        as_rotation_matrix : bool
+            Set to ``True`` to return the orientation as a rotation matrix,
+            ``False`` to return a quaternion.
 
         Returns
         -------
         :
-            A tuple ``(position, orientation)`` with position :math:`(x, y, z)`
-            and orientation quaternion :math:`(x, y, z, w)`.
+            A tuple containing the position and orientation of the link's
+            center of mass in the world frame. If ``as_rotation_matrix=True``,
+            then the orientation is represented as a :math:`3\\times3` rotation
+            matrix. If ``False``, then it is represented as a quaternion in
+            xyzw order.
         """
         pos, orn = pyb.getBasePositionAndOrientation(
             self.uid, physicsClientId=self.client_id
         )
-        return np.array(pos), np.array(orn)
+        pos = np.array(pos)
+        orn = np.array(orn)
+        if as_rotation_matrix:
+            orn = quaternion_to_matrix(orn)
+        return pos, orn
 
     def get_velocity(self):
         """Get the velocity of the body.

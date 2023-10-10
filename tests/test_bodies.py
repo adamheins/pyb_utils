@@ -25,6 +25,10 @@ def test_body_methods():
     box.set_pose(position=p, orientation=Q)
     assert np.allclose(box.get_pose()[0], p)
     assert np.allclose(box.get_pose()[1], Q)
+    assert np.allclose(
+        box.get_pose(as_rotation_matrix=True)[1],
+        pyb_utils.quaternion_to_matrix(Q),
+    )
 
     # set/get velocity
     box.set_velocity(linear=[1, 0, 0], angular=[0, 1, 0])
