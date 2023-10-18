@@ -44,24 +44,30 @@ class Robot:
         uid,
         tool_joint_name=None,
         actuated_joints=None,
+        client_id=0,
     ):
         self.uid = uid
+        self.client_id = client_id
 
-        n = pyb.getNumJoints(uid)
+        n = pyb.getNumJoints(uid, physicsClientId=client_id)
 
         # build a dict of all joint info
         joint_info = {}
         for i in range(n):
-            info = getJointInfo(uid, i, decode="utf-8")
+            info = getJointInfo(
+                uid, i, decode="utf-8", physicsClientId=client_id
+            )
             joint_info[info.jointName] = info
 
         # record indices of all non-fixed joints
         self._joint_indices = []
+        self.joint_names = []
         for name in joint_info:
             info = joint_info[name]
             if info.jointType == pyb.JOINT_FIXED:
                 continue
             self._joint_indices.append(info.jointIndex)
+            self.joint_names.append(name)  # TODO
         self.num_joints = len(self._joint_indices)
 
         if actuated_joints is None:
@@ -89,7 +95,9 @@ class Robot:
             A tuple ``(q, v)`` where ``q`` is the robot's joint configuration
             and ``v`` is the joint velocity.
         """
-        states = getJointStates(self.uid, self._joint_indices)
+        states = getJointStates(
+            self.uid, self._joint_indices, physicsClientId=self.client_id
+        )
         q = np.array([state.jointPosition for state in states])
         v = np.array([state.jointVelocity for state in states])
         return q, v
@@ -107,7 +115,9 @@ class Robot:
             ``self.num_joints``.
         """
         for idx, angle in zip(self._joint_indices, q):
-            pyb.resetJointState(self.uid, idx, angle)
+            pyb.resetJointState(
+                self.uid, idx, angle, physicsClientId=self.client_id
+            )
 
     def set_joint_friction_forces(self, forces, joint_indices=None):
         """Set the friction forces at each joint.
@@ -137,6 +147,7 @@ class Robot:
             controlMode=pyb.VELOCITY_CONTROL,
             targetVelocities=list(np.zeros_like(forces)),
             forces=forces,
+            physicsClientId=self.client_id,
         )
 
     def command_velocity(self, u):
@@ -156,6 +167,7 @@ class Robot:
             self._actuated_joint_indices,
             controlMode=pyb.VELOCITY_CONTROL,
             targetVelocities=list(u),
+            physicsClientId=self.client_id,
         )
 
     def command_effort(self, u):
@@ -176,6 +188,7 @@ class Robot:
             self._actuated_joint_indices,
             controlMode=pyb.TORQUE_CONTROL,
             forces=list(u),
+            physicsClientId=self.client_id,
         )
 
     def get_link_com_pose(self, link_idx=None, as_rotation_matrix=False):
@@ -224,7 +237,12 @@ class Robot:
         """
         if link_idx is None:
             link_idx = self.tool_idx
-        state = getLinkState(self.uid, link_idx, computeForwardKinematics=True)
+        state = getLinkState(
+            self.uid,
+            link_idx,
+            computeForwardKinematics=True,
+            physicsClientId=self.client_id,
+        )
         position = np.array(state.linkWorldPosition)
         orientation = np.array(state.linkWorldOrientation)
         if as_rotation_matrix:
@@ -256,7 +274,12 @@ class Robot:
         """
         if link_idx is None:
             link_idx = self.tool_idx
-        state = getLinkState(self.uid, link_idx, computeForwardKinematics=True)
+        state = getLinkState(
+            self.uid,
+            link_idx,
+            computeForwardKinematics=True,
+            physicsClientId=self.client_id,
+        )
         position = np.array(state.worldLinkFramePosition)
         orientation = np.array(state.worldLinkFrameOrientation)
         if as_rotation_matrix:
@@ -298,6 +321,7 @@ class Robot:
             self.uid,
             link_idx,
             computeLinkVelocity=True,
+            physicsClientId=self.client_id,
         )
         v_com = np.array(state.worldLinkLinearVelocity)
         ω_com = np.array(state.worldLinkAngularVelocity)
@@ -325,6 +349,7 @@ class Robot:
             link_idx,
             computeLinkVelocity=True,
             computeForwardKinematics=True,
+            physicsClientId=self.client_id,
         )
         C = quaternion_to_matrix(state.worldLinkFrameOrientation)
         v_com = np.array(state.worldLinkLinearVelocity)
@@ -372,7 +397,9 @@ class Robot:
         q = list(q)
         offset = list(offset)
 
-        Jv, Jw = pyb.calculateJacobian(self.uid, link_idx, offset, q, z, z)
+        Jv, Jw = pyb.calculateJacobian(
+            self.uid, link_idx, offset, q, z, z, physicsClientId=self.client_id
+        )
         J = np.vstack((Jv, Jw))
         return J
 
@@ -419,7 +446,7 @@ class Robot:
         """
         if link_idx is None:
             link_idx = self.tool_idx
-        state = getLinkState(self.uid, link_idx)
+        state = getLinkState(self.uid, link_idx, physicsClientId=self.client_id)
         return self.compute_link_jacobian(
             q=q, link_idx=link_idx, offset=state.localInertialFramePosition
         )

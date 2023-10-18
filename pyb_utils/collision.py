@@ -1,48 +1,18 @@
 """This module provides utilities for collision checking between objects."""
-from dataclasses import dataclass
+from collections import namedtuple
 
 import numpy as np
 import pybullet as pyb
 
-from .named_tuples import getJointInfo
+from .named_tuples import getJointInfo, getClosestPoints
 
 
-@dataclass
-class NamedCollisionObject:
-    """Name of a body and one of its links.
-
-    The body name must correspond to the key in the ``bodies`` dict, but is
-    otherwise arbitrary. The link name should match the URDF. The link name may
-    also be ``None``, in which case the base link ``(index -1)`` is used.
-
-    Attributes
-    ----------
-    body_name : str
-        Name of the body.
-    link_name : str
-        Name of the link on the body.
-    """
-
-    body_name: str
-    link_name: str = None
+_IndexedCollisionObject = namedtuple(
+    "_IndexedCollisionObject", ["body_uid", "link_uid"]
+)
 
 
-@dataclass
-class IndexedCollisionObject:
-    """Index of a body and one of its links.
-
-    Attributes
-    ----------
-    body_uid : int
-        UID of the body.
-    link_uid : int
-        Index of the link on the body.
-    """
-    body_uid: int
-    link_uid: int
-
-
-def index_collision_pairs(physics_uid, bodies, named_collision_pairs):
+def _index_collision_pairs(physics_uid, collision_pairs):
     """Convert a list of named collision pairs to indexed collision pairs.
 
     In other words, convert named bodies and links to the indexes used by
@@ -59,33 +29,39 @@ def index_collision_pairs(physics_uid, bodies, named_collision_pairs):
 
     Returns
     -------
-        A list of pairs of ``IndexedCollisionObject``.
+        A list of pairs of ``_IndexedCollisionObject``.
     """
 
-    # build a nested dictionary mapping body names to link names to link
-    # indices
-    body_link_map = {}
-    for name, uid in bodies.items():
-        body_link_map[name] = {}
-        n = pyb.getNumJoints(uid, physics_uid)
+    def _get_link_index(body_uid, link_name):
+        n = pyb.getNumJoints(body_uid, physics_uid)
         for i in range(n):
-            link_name = getJointInfo(
-                uid, i, physics_uid, decode="utf8"
-            ).linkName
-            body_link_map[name][link_name] = i
+            if (
+                getJointInfo(body_uid, i, physics_uid, decode="utf8").linkName
+                == link_name
+            ):
+                return i
+        raise ValueError(
+            f"Body with UID {body_uid} has no link named {link_name}"
+        )
 
     def _index_named_collision_object(obj):
         """Map body and link names to corresponding indices."""
-        body_uid = bodies[obj.body_name]
-        if obj.link_name is not None:
-            link_uid = body_link_map[obj.body_name][obj.link_name]
-        else:
+        if type(obj) == int:
+            body_uid = int(obj)
             link_uid = -1
-        return IndexedCollisionObject(body_uid, link_uid)
+        else:
+            body_uid = obj[0]
+            if type(obj[1]) == int:
+                link_uid = obj[1]
+            elif type(obj[1]) == str:
+                link_uid = _get_link_index(body_uid, obj[1])
+            else:
+                raise TypeError(f"Invalid type for link identifier {obj[1]}")
+        return _IndexedCollisionObject(body_uid, link_uid)
 
     # convert all pairs of named collision objects to indices
     indexed_collision_pairs = []
-    for a, b in named_collision_pairs:
+    for a, b in collision_pairs:
         a_indexed = _index_named_collision_object(a)
         b_indexed = _index_named_collision_object(b)
         indexed_collision_pairs.append((a_indexed, b_indexed))
@@ -100,26 +76,24 @@ class CollisionDetector:
     ----------
     col_id : int
         Index of the physics server used for collision queries.
-    bodies : dict
-        A dictionary with body names as keys and corresponding UIDs as values.
-    named_collision_pairs : list
-        A list of pairs of ``NamedCollisionObject``.
+    collision_pairs : list
+        A list of collision pairs, where each element is either a single
+        ``int`` representing a body UID, a tuple ``(int, int)`` representing
+        the body UID and link index, or a tuple ``(int, str)`` representing the
+        body UID and the link name.
     """
-    def __init__(self, col_id, bodies, named_collision_pairs):
+
+    def __init__(self, col_id, collision_pairs):
         self.col_id = col_id
-        self.bodies = bodies
-        self.indexed_collision_pairs = index_collision_pairs(
-            self.col_id, bodies, named_collision_pairs
+        self.indexed_collision_pairs = _index_collision_pairs(
+            self.col_id, collision_pairs
         )
 
-    def compute_distances(self, q=None, max_distance=1.0):
+    def compute_distances(self, max_distance=10.0):
         """Compute closest distances for a given configuration.
 
         Parameters
         ----------
-        q : iterable
-            The desired configuration. This is applied directly to PyBullet
-            body with index ``bodies["robot"]``.
         max_distance : float
             Bodies farther apart than this distance are not queried by
             PyBullet, the return value for the distance between such bodies
@@ -131,20 +105,10 @@ class CollisionDetector:
             An array of distances, one per pair of collision objects.
         """
 
-        # put the robot in the given configuration
-        if q is not None:
-            robot_id = self.bodies["robot"]
-            for i in range(
-                pyb.getNumJoints(robot_id, physicsClientId=self.col_id)
-            ):
-                pyb.resetJointState(
-                    robot_id, i, q[i], physicsClientId=self.col_id
-                )
-
         # compute shortest distances between all object pairs
         distances = []
         for a, b in self.indexed_collision_pairs:
-            closest_points = pyb.getClosestPoints(
+            closest_points = getClosestPoints(
                 a.body_uid,
                 b.body_uid,
                 distance=max_distance,
@@ -158,17 +122,17 @@ class CollisionDetector:
             if len(closest_points) == 0:
                 distances.append(max_distance)
             else:
-                distances.append(np.min([pt[8] for pt in closest_points]))
+                distances.append(
+                    np.min([pt.contactDistance for pt in closest_points])
+                )
 
         return np.array(distances)
 
-    def in_collision(self, q=None, margin=0):
+    def in_collision(self, margin=0):
         """Check if a configuration is in collision.
 
         Parameters
         ----------
-        q : iterable
-            The desired configuration of the robot.
         margin : float
             Distance at which objects are considered in collision. Default is
             ``0``.
@@ -178,5 +142,5 @@ class CollisionDetector:
         :
             True if configuration q is in collision, False otherwise.
         """
-        ds = self.compute_distances(q, max_distance=margin)
+        ds = self.compute_distances(max_distance=margin + 0.1)
         return (ds < margin).any()

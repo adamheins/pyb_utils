@@ -30,6 +30,7 @@ def load_environment(client_id):
         useFixedBase=True,
         physicsClientId=client_id,
     )
+    robot = pyb_utils.Robot(kuka_id, client_id=client_id)
 
     # some cubes for obstacles
     cube1_id = pyb.loadURDF(
@@ -43,49 +44,38 @@ def load_environment(client_id):
     )
 
     # store body indices in a dict with more convenient key names
-    bodies = {
-        "robot": kuka_id,
+    obstacles = {
         "ground": ground_id,
         "cube1": cube1_id,
         "cube2": cube2_id,
         "cube3": cube3_id,
     }
-    return bodies
+    return robot, obstacles
 
 
-def create_robot_debug_params(robot_id, gui_id):
+def create_robot_debug_params(robot):
     """Create debug params to set the robot joint positions from the GUI."""
     params = {}
-    for i in range(pyb.getNumJoints(robot_id, physicsClientId=gui_id)):
-        joint_name = pyb_utils.getJointInfo(robot_id, i, decode="utf8").jointName
-        params[joint_name] = pyb.addUserDebugParameter(
-            joint_name,
+    for name in robot.joint_names:
+        params[name] = pyb.addUserDebugParameter(
+            name,
             rangeMin=-2 * np.pi,
             rangeMax=2 * np.pi,
             startValue=0,
-            physicsClientId=gui_id,
+            physicsClientId=robot.client_id,
         )
     return params
 
 
-def read_robot_configuration(robot_id, robot_params, gui_id):
+def read_robot_configuration(robot, robot_params):
     """Read robot configuration from the GUI."""
-    n = pyb.getNumJoints(robot_id, physicsClientId=gui_id)
-    q = np.zeros(n)
-
-    for i in range(n):
-        joint_name = pyb_utils.getJointInfo(robot_id, i, decode="utf8").jointName
+    q = np.zeros(robot.num_joints)
+    for i, name in enumerate(robot.joint_names):
         q[i] = pyb.readUserDebugParameter(
-            robot_params[joint_name],
-            physicsClientId=gui_id,
+            robot_params[name],
+            physicsClientId=robot.client_id,
         )
     return q
-
-
-def update_robot_configuration(robot_id, q, gui_id):
-    """Set the robot configuration."""
-    for i in range(pyb.getNumJoints(robot_id, physicsClientId=gui_id)):
-        pyb.resetJointState(robot_id, i, q[i], physicsClientId=gui_id)
 
 
 def main():
@@ -97,10 +87,8 @@ def main():
     col_id = pyb.connect(pyb.DIRECT)
 
     # add bodies to both of the environments
-    bodies = load_environment(gui_id)
-    collision_bodies = load_environment(col_id)
-
-    robot_id = bodies["robot"]
+    robot, _ = load_environment(gui_id)
+    col_robot, col_obstacles = load_environment(col_id)
 
     # create user debug parameters
     collision_margin_param = pyb.addUserDebugParameter(
@@ -110,42 +98,36 @@ def main():
         startValue=0.01,
         physicsClientId=gui_id,
     )
-    robot_params = create_robot_debug_params(robot_id, gui_id)
+    robot_params = create_robot_debug_params(robot)
 
     # define bodies (and links) to use for shortest distance computations and
     # collision checking
-    ground = pyb_utils.NamedCollisionObject("ground")
-    cube1 = pyb_utils.NamedCollisionObject("cube1")
-    cube2 = pyb_utils.NamedCollisionObject("cube2")
-    cube3 = pyb_utils.NamedCollisionObject("cube3")
-    link7 = pyb_utils.NamedCollisionObject(
-        "robot", "lbr_iiwa_link_7"
-    )  # last link
+    ground = col_obstacles["ground"]
+    cube1 = col_obstacles["cube1"]
+    cube2 = col_obstacles["cube2"]
+    cube3 = col_obstacles["cube3"]
+    link7 = (col_robot.uid, "lbr_iiwa_link_7")
 
     col_detector = pyb_utils.CollisionDetector(
         col_id,
-        collision_bodies,
         [(link7, ground), (link7, cube1), (link7, cube2), (link7, cube3)],
     )
 
-    robot_id = bodies["robot"]
+    last_dists = 0
 
     while True:
-        q = read_robot_configuration(robot_id, robot_params, gui_id)
-
-        # compute shortest distances for user-selected configuration
-        d = col_detector.compute_distances(q)
-        in_col = col_detector.in_collision(
-            q, margin=pyb.readUserDebugParameter(collision_margin_param)
-        )
+        q = read_robot_configuration(robot, robot_params)
 
         # move to the requested configuration if it is not in collision,
         # otherwise display a warning
         # the key is that we can check collisions using the separate physics
         # client, so we don't have to set the robot to a configuration in the
         # main GUI sim to check if that configuration is in collision
-        if not in_col:
-            update_robot_configuration(robot_id, q, gui_id=gui_id)
+        col_robot.reset_joint_configuration(q)
+        if not col_detector.in_collision(
+            margin=pyb.readUserDebugParameter(collision_margin_param),
+        ):
+            robot.reset_joint_configuration(q)
         else:
             pyb.addUserDebugText(
                 "Avoiding collision",
@@ -155,9 +137,12 @@ def main():
                 lifeTime=0.2,
             )
 
-        print(f"Distance to obstacles = {d}")
+        # compute shortest distances for user-selected configuration
+        dists = col_detector.compute_distances()
+        if not np.allclose(last_dists, dists):
+            print(f"Distance to obstacles = {dists}")
+            last_dists = dists
 
-        pyb.stepSimulation(physicsClientId=gui_id)
         time.sleep(TIMESTEP)
 
 

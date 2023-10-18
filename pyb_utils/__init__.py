@@ -1,6 +1,6 @@
 from .bodies import BulletBody
 from .camera import Camera, VideoRecorder
-from .collision import NamedCollisionObject, CollisionDetector
+from .collision import CollisionDetector
 from .frame import debug_frame, debug_frame_world
 from .ghost import GhostObject
 from .math import (
