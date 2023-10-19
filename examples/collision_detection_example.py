@@ -53,7 +53,7 @@ def load_environment(client_id):
     return robot, obstacles
 
 
-def create_robot_debug_params(robot):
+def create_robot_params_gui(robot):
     """Create debug params to set the robot joint positions from the GUI."""
     params = {}
     for name in robot.moveable_joint_names:
@@ -67,17 +67,17 @@ def create_robot_debug_params(robot):
     return params
 
 
-def read_robot_configuration(robot, robot_params):
+def read_robot_params_gui(robot_params_gui, client_id):
     """Read robot configuration from the GUI."""
-    q = []
-    for i, name in enumerate(robot.moveable_joint_names):
-        q.append(
+    return np.array(
+        [
             pyb.readUserDebugParameter(
-                robot_params[name],
-                physicsClientId=robot.client_id,
+                param,
+                physicsClientId=client_id,
             )
-        )
-    return np.array(q)
+            for param in robot_params_gui.values()
+        ]
+    )
 
 
 def main():
@@ -93,14 +93,14 @@ def main():
     col_robot, col_obstacles = load_environment(col_id)
 
     # create user debug parameters
-    collision_margin_param = pyb.addUserDebugParameter(
+    collision_margin_param_gui = pyb.addUserDebugParameter(
         "collision_margin",
         rangeMin=0,
         rangeMax=0.2,
         startValue=0.01,
         physicsClientId=gui_id,
     )
-    robot_params = create_robot_debug_params(robot)
+    robot_params_gui = create_robot_params_gui(robot)
 
     # define bodies (and links) to use for shortest distance computations and
     # collision checking
@@ -118,7 +118,7 @@ def main():
     last_dists = 0
 
     while True:
-        q = read_robot_configuration(robot, robot_params)
+        q = read_robot_params_gui(robot_params_gui, client_id=gui_id)
 
         # move to the requested configuration if it is not in collision,
         # otherwise display a warning
@@ -127,7 +127,7 @@ def main():
         # main GUI sim to check if that configuration is in collision
         col_robot.reset_joint_configuration(q)
         if not col_detector.in_collision(
-            margin=pyb.readUserDebugParameter(collision_margin_param),
+            margin=pyb.readUserDebugParameter(collision_margin_param_gui),
         ):
             robot.reset_joint_configuration(q)
         else:
