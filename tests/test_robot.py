@@ -23,27 +23,31 @@ def test_robot_setup():
     )
 
     robot1 = pyb_utils.Robot(kuka_id)
-    assert robot1.num_joints == 7
-    assert robot1.num_actuated_joints == robot1.num_joints
-    assert robot1.tool_idx == robot1.num_joints - 1
+    assert robot1.num_total_joints == 7
+    assert robot1.num_moveable_joints == 7
+    assert robot1.num_actuated_joints == 7
+    assert robot1.tool_idx == robot1.num_total_joints - 1
 
     # specify the tool joint by name
     robot2 = pyb_utils.Robot(kuka_id, tool_joint_name="lbr_iiwa_joint_7")
-    assert robot2.num_joints == 7
-    assert robot2.num_actuated_joints == robot2.num_joints
-    assert robot2.tool_idx == robot2.num_joints - 1
+    assert robot2.num_total_joints == 7
+    assert robot2.num_moveable_joints == 7
+    assert robot2.num_actuated_joints == 7
+    assert robot2.tool_idx == robot2.num_total_joints - 1
 
     # set tool as something other than last joint/link
     robot3 = pyb_utils.Robot(kuka_id, tool_joint_name="lbr_iiwa_joint_6")
-    assert robot3.num_joints == 7
-    assert robot3.num_actuated_joints == robot3.num_joints
-    assert robot3.tool_idx == robot3.num_joints - 2
+    assert robot3.num_total_joints == 7
+    assert robot3.num_moveable_joints == 7
+    assert robot3.num_actuated_joints == 7
+    assert robot3.tool_idx == robot3.num_total_joints - 2
 
     # reduced number of actuated joints
     robot4 = pyb_utils.Robot(
         kuka_id, actuated_joint_names=[f"lbr_iiwa_joint_{i+1}" for i in range(5)]
     )
-    assert robot4.num_joints == 7
+    assert robot4.num_total_joints == 7
+    assert robot4.num_moveable_joints == 7
     assert robot4.num_actuated_joints == 5
 
 
@@ -56,19 +60,19 @@ def test_robot_joint_states():
     robot = pyb_utils.Robot(kuka_id)
 
     q, v = robot.get_joint_states()
-    assert np.allclose(q, np.zeros(robot.num_joints))
-    assert np.allclose(v, np.zeros(robot.num_joints))
+    assert np.allclose(q, np.zeros(robot.num_moveable_joints))
+    assert np.allclose(v, np.zeros(robot.num_moveable_joints))
 
     # Velocity commands are done via motor control and so require stepping the
     # simulation. Setting the joint positions directly overrides the physics
     # and takes effect instantly.
-    vd = np.ones(robot.num_joints)
+    vd = np.ones(robot.num_actuated_joints)
     robot.command_velocity(vd)
     pyb.stepSimulation()
     _, v = robot.get_joint_states()
     assert np.allclose(v, vd, rtol=0, atol=1e-3)
 
-    qd = np.ones(robot.num_joints)
+    qd = np.ones(robot.num_moveable_joints)
     robot.reset_joint_configuration(qd)
     q, _ = robot.get_joint_states()
     assert np.allclose(q, qd)
@@ -123,7 +127,7 @@ def test_robot_jacobian():
     robot = pyb_utils.Robot(kuka_id)
 
     # send a velocity command
-    vd = np.ones(robot.num_joints)
+    vd = np.ones(robot.num_actuated_joints)
     robot.command_velocity(vd)
     pyb.stepSimulation()
 
@@ -140,7 +144,7 @@ def test_robot_jacobian():
     assert np.allclose(V, J @ v, rtol=0, atol=1e-2)
 
     # compute at another configuration
-    q = np.ones(robot.num_joints)
+    q = np.ones(robot.num_moveable_joints)
     robot.reset_joint_configuration(q)
 
     robot.command_velocity(vd)
@@ -168,5 +172,5 @@ def test_robot_joint_effort():
         useFixedBase=True,
     )
     robot = pyb_utils.Robot(kuka_id)
-    robot.set_joint_friction_forces(np.zeros(robot.num_joints))
-    robot.command_effort(np.ones(robot.num_joints))
+    robot.set_joint_friction_forces(np.zeros(robot.num_moveable_joints))
+    robot.command_effort(np.ones(robot.num_actuated_joints))

@@ -62,32 +62,33 @@ class Robot:
 
         # build a dict of all joint info
         joint_info = {}
+        self.all_joint_names = []
+        self.link_names = []
         for i in range(n):
             info = getJointInfo(
                 uid, i, decode="utf-8", physicsClientId=client_id
             )
             joint_info[info.jointName] = info
+            self.all_joint_names.append(info.jointName)
+            self.link_names.append(info.linkName)
 
         # record names and indices of all non-fixed joints
-        self._joint_indices = []
-        self.joint_names = []
-        for name in joint_info:
-            info = joint_info[name]
+        self._moveable_joint_indices = []
+        self.moveable_joint_names = []
+        for name, info in joint_info.items():
             if info.jointType == pyb.JOINT_FIXED:
                 continue
-            self._joint_indices.append(info.jointIndex)
-            self.joint_names.append(name)
-        self.num_joints = len(self._joint_indices)
+            self._moveable_joint_indices.append(info.jointIndex)
+            self.moveable_joint_names.append(name)
 
         if actuated_joint_names is None:
-            self._actuated_joint_indices = self._joint_indices
-            self.actuated_joint_names = self.joint_names
+            self._actuated_joint_indices = self._moveable_joint_indices
+            self.actuated_joint_names = self.moveable_joint_names
         else:
             self._actuated_joint_indices = [
                 joint_info[name].jointIndex for name in actuated_joint_names
             ]
             self.actuated_joint_names = actuated_joint_names
-        self.num_actuated_joints = len(self._actuated_joint_indices)
 
         if tool_joint_name is None:
             self.tool_idx = n - 1
@@ -97,8 +98,32 @@ class Robot:
             except KeyError:
                 raise ValueError(f"No joint with name {tool_joint_name} found.")
 
+    @property
+    def num_total_joints(self):
+        return len(self.all_joint_names)
+
+    @property
+    def num_moveable_joints(self):
+        return len(self.moveable_joint_names)
+
+    @property
+    def num_actuated_joints(self):
+        return len(self.actuated_joint_names)
+
+    def get_joint_index(self, name):
+        try:
+            return self.all_joint_names.index(name)
+        except ValueError:
+            raise ValueError(f"Robot has no joint named {name}.")
+
+    def get_link_index(self, name):
+        try:
+            return self.link_names.index(name)
+        except ValueError:
+            raise ValueError(f"Robot has no link named {name}.")
+
     def get_joint_states(self):
-        """Get position and velocity of the robot's joints.
+        """Get position and velocity of the robot's moveable joints.
 
         Returns
         -------
@@ -107,7 +132,9 @@ class Robot:
             and ``v`` is the joint velocity.
         """
         states = getJointStates(
-            self.uid, self._joint_indices, physicsClientId=self.client_id
+            self.uid,
+            self._moveable_joint_indices,
+            physicsClientId=self.client_id,
         )
         q = np.array([state.jointPosition for state in states])
         v = np.array([state.jointVelocity for state in states])
@@ -125,7 +152,7 @@ class Robot:
             The vector of joint values to set. Must be of length
             ``self.num_joints``.
         """
-        for idx, angle in zip(self._joint_indices, q):
+        for idx, angle in zip(self._moveable_joint_indices, q):
             pyb.resetJointState(
                 self.uid, idx, angle, physicsClientId=self.client_id
             )
@@ -146,7 +173,7 @@ class Robot:
         """
 
         if joint_indices is None:
-            joint_indices = self._joint_indices
+            joint_indices = self._moveable_joint_indices
 
         assert len(forces) == len(
             joint_indices

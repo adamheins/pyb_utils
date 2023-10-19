@@ -128,8 +128,8 @@ def test_joint_states():
     state = pyb_utils.getJointState(robot.uid, 2)
     assert np.isclose(state.jointPosition, 0)
 
-    states = pyb_utils.getJointStates(robot.uid, np.arange(robot.num_joints))
-    assert len(states) == robot.num_joints
+    states = pyb_utils.getJointStates(robot.uid, np.arange(robot.num_total_joints))
+    assert len(states) == robot.num_total_joints
 
 
 def test_link_states():
@@ -164,5 +164,5 @@ def test_link_states():
     assert not np.allclose(state1.worldLinkFramePosition, state2.worldLinkFramePosition)
     assert not np.allclose(state1.worldLinkFrameOrientation, state2.worldLinkFrameOrientation)
 
-    states = pyb_utils.getLinkStates(robot.uid, np.arange(robot.num_joints))
-    assert len(states) == robot.num_joints
+    states = pyb_utils.getLinkStates(robot.uid, np.arange(robot.num_total_joints))
+    assert len(states) == robot.num_total_joints

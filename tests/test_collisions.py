@@ -56,10 +56,10 @@ def test_collision_detection_robot():
     assert len(dists1) == 1
 
     # or look at each link individually
-    robot_col_ids = [(robot.uid, i) for i in range(robot.num_joints)]
+    robot_col_ids = [(robot.uid, i) for i in range(robot.num_total_joints)]
     col_pairs = [(r, box.uid) for r in robot_col_ids]
     detector2 = pyb_utils.CollisionDetector(0, col_pairs)
     dists2 = detector2.compute_distances()
     assert detector2.in_collision()
-    assert len(dists2) == robot.num_joints
+    assert len(dists2) == robot.num_total_joints
     assert np.isclose(dists1[0], np.min(dists2))
