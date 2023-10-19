@@ -25,7 +25,7 @@ def main():
     )
 
     # only control the first (top) of the two joints
-    robot = pyb_utils.Robot(robot_id, actuated_joints=["shaft1_joint"])
+    robot = pyb_utils.Robot(robot_id, actuated_joint_names=["shaft1_joint"])
     robot.set_joint_friction_forces([0, 0])
 
     # apply some force

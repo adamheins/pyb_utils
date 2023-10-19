@@ -14,15 +14,18 @@ class Robot:
     ----------
     uid : int
         The unique ID of the underlying PyBullet robot body.
-    joint_names : list
-        A list of the names of the (moveable) joints.
+    all_joint_names : list
+        A list of all joint names, including fixed and moveable joints.
+    moveable_joint_names : list
+        A list of the names of the moveable joints.
     actuated_joint_names : list
         A list of the actuated joint names. This is the same as the list of
         joint names unless ``actuated_joint_names`` is provided to the
         constructor.
-    num_joints : int
-        The total number of joints (only moveable joints are included; fixed
-        joints are not).
+    num_total_joints : int
+        The total number of joints, including fixed and moveable joints.
+    num_moveable_joints : int
+        The number of moveable joints.
     num_actuated_joints : int
         The number of actuated (i.e., controlled) joints. This should never be
         more than `num_joints`.
@@ -46,6 +49,12 @@ class Robot:
     client_id : int
         The physics server UID to connect to, if multiple servers are being
         used.
+
+    Raises
+    ------
+    ValueError
+        If ``tool_joint_name`` is provided but the robot has no joint with that
+        name.
     """
 
     def __init__(
@@ -60,66 +69,106 @@ class Robot:
 
         n = pyb.getNumJoints(uid, physicsClientId=client_id)
 
-        # build a dict of all joint info
-        joint_info = {}
-        self.all_joint_names = []
-        self.link_names = []
+        # build mappings of joint and link names to their respective indices
+        # for look up later
+        # also record the indices of the moveable joints
+        self._link_index_map = {}
+        self._joint_index_map = {}
+        self._moveable_joint_indices = []
         for i in range(n):
             info = getJointInfo(
                 uid, i, decode="utf-8", physicsClientId=client_id
             )
-            joint_info[info.jointName] = info
-            self.all_joint_names.append(info.jointName)
-            self.link_names.append(info.linkName)
+            self._joint_index_map[info.jointName] = i
+            self._link_index_map[info.linkName] = i
 
-        # record names and indices of all non-fixed joints
-        self._moveable_joint_indices = []
-        self.moveable_joint_names = []
-        for name, info in joint_info.items():
-            if info.jointType == pyb.JOINT_FIXED:
-                continue
-            self._moveable_joint_indices.append(info.jointIndex)
-            self.moveable_joint_names.append(name)
+            if info.jointType != pyb.JOINT_FIXED:
+                self._moveable_joint_indices.append(i)
 
         if actuated_joint_names is None:
             self._actuated_joint_indices = self._moveable_joint_indices
-            self.actuated_joint_names = self.moveable_joint_names
         else:
             self._actuated_joint_indices = [
-                joint_info[name].jointIndex for name in actuated_joint_names
+                self._joint_index_map[name] for name in actuated_joint_names
             ]
-            self.actuated_joint_names = actuated_joint_names
 
         if tool_joint_name is None:
             self.tool_idx = n - 1
         else:
-            try:
-                self.tool_idx = joint_info[tool_joint_name].jointIndex
-            except KeyError:
-                raise ValueError(f"No joint with name {tool_joint_name} found.")
+            self.tool_idx = self.get_joint_index(tool_joint_name)
 
     @property
     def num_total_joints(self):
-        return len(self.all_joint_names)
+        return len(self._joint_index_map)
 
     @property
     def num_moveable_joints(self):
-        return len(self.moveable_joint_names)
+        return len(self._moveable_joint_indices)
 
     @property
     def num_actuated_joints(self):
-        return len(self.actuated_joint_names)
+        return len(self._actuated_joint_indices)
+
+    @property
+    def link_names(self):
+        return list(self._link_index_map.keys())
+
+    @property
+    def all_joint_names(self):
+        return list(self._joint_index_map.keys())
+
+    @property
+    def moveable_joint_names(self):
+        return [self.all_joint_names[i] for i in self._moveable_joint_indices]
+
+    @property
+    def actuated_joint_names(self):
+        return [self.all_joint_names[i] for i in self._actuated_joint_indices]
 
     def get_joint_index(self, name):
+        """Get the index of the joint named ``name``.
+
+        Parameters
+        ----------
+        name : str
+            The name of the joint.
+
+        Returns
+        -------
+        :
+            The index of the joint.
+
+        Raises
+        ------
+        ValueError
+            If the robot has no joint named ``name``.
+        """
         try:
-            return self.all_joint_names.index(name)
-        except ValueError:
+            return self._joint_index_map[name]
+        except KeyError:
             raise ValueError(f"Robot has no joint named {name}.")
 
     def get_link_index(self, name):
+        """Get the index of the link named ``name``.
+
+        Parameters
+        ----------
+        name : str
+            The name of the link.
+
+        Returns
+        -------
+        :
+            The index of the link.
+
+        Raises
+        ------
+        ValueError
+            If the robot has no link named ``name``.
+        """
         try:
-            return self.link_names.index(name)
-        except ValueError:
+            return self._link_index_map[name]
+        except KeyError:
             raise ValueError(f"Robot has no link named {name}.")
 
     def get_joint_states(self):
@@ -150,7 +199,7 @@ class Robot:
         ----------
         q : iterable
             The vector of joint values to set. Must be of length
-            ``self.num_joints``.
+            ``self.num_moveable_joints``.
         """
         for idx, angle in zip(self._moveable_joint_indices, q):
             pyb.resetJointState(
@@ -169,7 +218,7 @@ class Robot:
         joint_indices : iterable
             An optional list of joint indices to specify forces for. If not
             provided, then it is assumed forces are being provided for all
-            joints.
+            moveable joints.
         """
 
         if joint_indices is None:

@@ -56,7 +56,7 @@ def load_environment(client_id):
 def create_robot_debug_params(robot):
     """Create debug params to set the robot joint positions from the GUI."""
     params = {}
-    for name in robot.joint_names:
+    for name in robot.moveable_joint_names:
         params[name] = pyb.addUserDebugParameter(
             name,
             rangeMin=-2 * np.pi,
@@ -69,13 +69,15 @@ def create_robot_debug_params(robot):
 
 def read_robot_configuration(robot, robot_params):
     """Read robot configuration from the GUI."""
-    q = np.zeros(robot.num_joints)
-    for i, name in enumerate(robot.joint_names):
-        q[i] = pyb.readUserDebugParameter(
-            robot_params[name],
-            physicsClientId=robot.client_id,
+    q = []
+    for i, name in enumerate(robot.moveable_joint_names):
+        q.append(
+            pyb.readUserDebugParameter(
+                robot_params[name],
+                physicsClientId=robot.client_id,
+            )
         )
-    return q
+    return np.array(q)
 
 
 def main():

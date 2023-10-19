@@ -27,6 +27,17 @@ def test_robot_setup():
     assert robot1.num_moveable_joints == 7
     assert robot1.num_actuated_joints == 7
     assert robot1.tool_idx == robot1.num_total_joints - 1
+    for i in range(robot1.num_total_joints):
+        joint_name = f"lbr_iiwa_joint_{i+1}"
+        link_name = f"lbr_iiwa_link_{i+1}"
+
+        assert robot1.all_joint_names[i] == joint_name
+        assert robot1.moveable_joint_names[i] == joint_name
+        assert robot1.actuated_joint_names[i] == joint_name
+        assert robot1.link_names[i] == link_name
+
+        assert robot1.get_link_index(link_name) == i
+        assert robot1.get_joint_index(joint_name) == i
 
     # specify the tool joint by name
     robot2 = pyb_utils.Robot(kuka_id, tool_joint_name="lbr_iiwa_joint_7")
