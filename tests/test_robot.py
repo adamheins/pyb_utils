@@ -1,6 +1,7 @@
 import numpy as np
 import pybullet as pyb
 import pybullet_data
+from robot_descriptions.loaders.pybullet import load_robot_description
 from spatialmath.base import rotz
 import pyb_utils
 
@@ -55,7 +56,8 @@ def test_robot_setup():
 
     # reduced number of actuated joints
     robot4 = pyb_utils.Robot(
-        kuka_id, actuated_joint_names=[f"lbr_iiwa_joint_{i+1}" for i in range(5)]
+        kuka_id,
+        actuated_joint_names=[f"lbr_iiwa_joint_{i+1}" for i in range(5)],
     )
     assert robot4.num_total_joints == 7
     assert robot4.num_moveable_joints == 7
@@ -185,3 +187,17 @@ def test_robot_joint_effort():
     robot = pyb_utils.Robot(kuka_id)
     robot.set_joint_friction_forces(np.zeros(robot.num_moveable_joints))
     robot.command_effort(np.ones(robot.num_actuated_joints))
+
+
+def test_robot_with_fixed_joints():
+    ur10_id = load_robot_description(
+        "ur10_description",
+        basePosition=[0, 0, 0],
+        useFixedBase=True,
+    )
+
+    # the UR10 has some extra fixed joints
+    robot = pyb_utils.Robot(ur10_id)
+    assert robot.num_total_joints == 10
+    assert robot.num_moveable_joints == 6
+    assert robot.num_actuated_joints == 6
