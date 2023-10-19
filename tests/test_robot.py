@@ -41,7 +41,7 @@ def test_robot_setup():
 
     # reduced number of actuated joints
     robot4 = pyb_utils.Robot(
-        kuka_id, actuated_joints=[f"lbr_iiwa_joint_{i+1}" for i in range(5)]
+        kuka_id, actuated_joint_names=[f"lbr_iiwa_joint_{i+1}" for i in range(5)]
     )
     assert robot4.num_joints == 7
     assert robot4.num_actuated_joints == 5

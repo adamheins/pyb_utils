@@ -12,7 +12,7 @@ _IndexedCollisionObject = namedtuple(
 )
 
 
-def _index_collision_pairs(physics_uid, collision_pairs):
+def _index_collision_pairs(client_id, collision_pairs):
     """Convert a list of named collision pairs to indexed collision pairs.
 
     In other words, convert named bodies and links to the indexes used by
@@ -22,10 +22,8 @@ def _index_collision_pairs(physics_uid, collision_pairs):
     ----------
     physics_uid : int
         Index of the PyBullet physics server to use.
-    bodies : dict
-        A dictionary with body names as keys and corresponding UIDs as values.
-    named_collision_pairs : list
-        A list of pairs of ``NamedCollisionObject``.
+    collision_pairs : list
+        TODO
 
     Returns
     -------
@@ -33,10 +31,12 @@ def _index_collision_pairs(physics_uid, collision_pairs):
     """
 
     def _get_link_index(body_uid, link_name):
-        n = pyb.getNumJoints(body_uid, physics_uid)
+        n = pyb.getNumJoints(body_uid, physicsClientId=client_id)
         for i in range(n):
             if (
-                getJointInfo(body_uid, i, physics_uid, decode="utf8").linkName
+                getJointInfo(
+                    body_uid, i, physicsClientId=client_id, decode="utf8"
+                ).linkName
                 == link_name
             ):
                 return i
@@ -48,8 +48,11 @@ def _index_collision_pairs(physics_uid, collision_pairs):
         """Map body and link names to corresponding indices."""
         if type(obj) == int:
             body_uid = int(obj)
-            link_uid = -1
+            link_uid = -2
         else:
+            if not len(obj) == 2:
+                raise ValueError(f"Invalid value for collision body {obj}")
+
             body_uid = obj[0]
             if type(obj[1]) == int:
                 link_uid = obj[1]
@@ -74,19 +77,20 @@ class CollisionDetector:
 
     Parameters
     ----------
-    col_id : int
+    client_id : int
         Index of the physics server used for collision queries.
     collision_pairs : list
-        A list of collision pairs, where each element is either a single
-        ``int`` representing a body UID, a tuple ``(int, int)`` representing
-        the body UID and link index, or a tuple ``(int, str)`` representing the
-        body UID and the link name.
+        A list of collision pairs, where each element is a 2-tuple representing
+        two collision bodies. Each collision body is represented as either a
+        single ``int`` representing a body UID, a tuple ``(int, int)``
+        representing the body UID and link index, or a tuple ``(int, str)``
+        representing the body UID and the link name.
     """
 
-    def __init__(self, col_id, collision_pairs):
-        self.col_id = col_id
+    def __init__(self, client_id, collision_pairs):
+        self.client_id = client_id
         self.indexed_collision_pairs = _index_collision_pairs(
-            self.col_id, collision_pairs
+            self.client_id, collision_pairs
         )
 
     def compute_distances(self, max_distance=10.0):
@@ -114,7 +118,7 @@ class CollisionDetector:
                 distance=max_distance,
                 linkIndexA=a.link_uid,
                 linkIndexB=b.link_uid,
-                physicsClientId=self.col_id,
+                physicsClientId=self.client_id,
             )
 
             # if bodies are above max_distance apart, nothing is returned, so

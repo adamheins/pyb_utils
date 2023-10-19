@@ -14,6 +14,12 @@ class Robot:
     ----------
     uid : int
         The unique ID of the underlying PyBullet robot body.
+    joint_names : list
+        A list of the names of the (moveable) joints.
+    actuated_joint_names : list
+        A list of the actuated joint names. This is the same as the list of
+        joint names unless ``actuated_joint_names`` is provided to the
+        constructor.
     num_joints : int
         The total number of joints (only moveable joints are included; fixed
         joints are not).
@@ -31,19 +37,22 @@ class Robot:
     tool_joint_name : str
         If provided, use the child link of this joint as the end effector. If
         it is ``None``, then the link corresponding to the last joint is used.
-    actuated_joints : iterable
+    actuated_joint_names : iterable
         An optional list of actuated joint names. These joints will be
         "actuated", in that they take commands from the ``command_`` methods.
         If not provided, all moveable joints are considered actuated. To have a
         free-moving joint (whether actuated or not), see
         :meth:`set_joint_friction_forces`.
+    client_id : int
+        The physics server UID to connect to, if multiple servers are being
+        used.
     """
 
     def __init__(
         self,
         uid,
         tool_joint_name=None,
-        actuated_joints=None,
+        actuated_joint_names=None,
         client_id=0,
     ):
         self.uid = uid
@@ -59,7 +68,7 @@ class Robot:
             )
             joint_info[info.jointName] = info
 
-        # record indices of all non-fixed joints
+        # record names and indices of all non-fixed joints
         self._joint_indices = []
         self.joint_names = []
         for name in joint_info:
@@ -67,15 +76,17 @@ class Robot:
             if info.jointType == pyb.JOINT_FIXED:
                 continue
             self._joint_indices.append(info.jointIndex)
-            self.joint_names.append(name)  # TODO
+            self.joint_names.append(name)
         self.num_joints = len(self._joint_indices)
 
-        if actuated_joints is None:
+        if actuated_joint_names is None:
             self._actuated_joint_indices = self._joint_indices
+            self.actuated_joint_names = self.joint_names
         else:
             self._actuated_joint_indices = [
-                joint_info[name].jointIndex for name in actuated_joints
+                joint_info[name].jointIndex for name in actuated_joint_names
             ]
+            self.actuated_joint_names = actuated_joint_names
         self.num_actuated_joints = len(self._actuated_joint_indices)
 
         if tool_joint_name is None:
