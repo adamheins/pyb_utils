@@ -56,9 +56,9 @@ hood):
 >>> q = (0, 0, np.sqrt(2) / 2, np.sqrt(2) / 2)  # 90 deg rotation about z-axis
 
 >>> pyb_utils.quaternion_to_matrix(q)  # convert to rotation matrix
-array([[ 1.,  0.,  0.],
-       [ 0., -0., -1.],
-       [ 0.,  1., -0.]])
+array([[-0.,  -1.,  0.],
+       [ 1.,  -0.,  0.],
+       [ 0.,   0.,  1.]])
 
 >>> pyb_utils.quaternion_multiply(q, q)  # rotate two quaternions together
 array([0, 0, -1, 0])                     # 180 deg rotate about z
