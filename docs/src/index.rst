@@ -11,7 +11,7 @@ doing research with PyBullet.
 
 Installation
 ------------
-This package requires **Python 3.8+**. It has been tested on Ubuntu 16.04,
+This package requires **Python 3.8–3.11**. It has been tested on Ubuntu 16.04,
 18.04, and 20.04. Install with pip: ``pip install pyb_utils``.
 
 The source code and README can be found `here

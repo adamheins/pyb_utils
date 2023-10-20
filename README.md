@@ -15,7 +15,7 @@ including:
 * Basic quaternion functions.
 
 ## Install and run
-This package requires **Python 3.8+**. It has been tested on Ubuntu 16.04,
+This package supports **Python 3.8–3.11**. It has been tested on Ubuntu 16.04,
 18.04, and 20.04.
 
 ### From pip

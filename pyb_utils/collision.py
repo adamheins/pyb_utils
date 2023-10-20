@@ -20,10 +20,14 @@ def _index_collision_pairs(client_id, collision_pairs):
 
     Parameters
     ----------
-    physics_uid : int
+    client_id : int
         Index of the PyBullet physics server to use.
     collision_pairs : list
-        TODO
+        A list of collision pairs, where each element is a 2-tuple representing
+        two collision bodies. Each collision body is represented as either a
+        single ``int`` representing a body UID, a tuple ``(int, int)``
+        representing the body UID and link index, or a tuple ``(int, str)``
+        representing the body UID and the link name.
 
     Returns
     -------
@@ -106,7 +110,9 @@ class CollisionDetector:
         Returns
         -------
         :
-            An array of distances, one per pair of collision objects.
+            An array of distances, one per pair of collision objects. Each
+            distance is at most ``max_distance``, even if the actual distance
+            is greater.
         """
 
         # compute shortest distances between all object pairs

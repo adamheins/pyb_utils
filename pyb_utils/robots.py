@@ -14,32 +14,20 @@ class Robot:
     ----------
     uid : int
         The unique ID of the underlying PyBullet robot body.
-    all_joint_names : list
-        A list of all joint names, including fixed and moveable joints.
-    moveable_joint_names : list
-        A list of the names of the moveable joints.
-    actuated_joint_names : list
-        A list of the actuated joint names. This is the same as the list of
-        joint names unless ``actuated_joint_names`` is provided to the
-        constructor.
-    num_total_joints : int
-        The total number of joints, including fixed and moveable joints.
-    num_moveable_joints : int
-        The number of moveable joints.
-    num_actuated_joints : int
-        The number of actuated (i.e., controlled) joints. This should never be
-        more than `num_joints`.
+    client_id : int
+        The unique ID of the physics server this robot belongs to.
     tool_idx : int
-        The index of the tool joint. Note that this corresponds to the tool
-        link, since each link has the same index as its parent joint.
+        The index of the tool joint/link (in PyBullet each link has the same
+        index as its parent joint).
 
     Parameters
     ----------
     uid : int
         The UID of the body representing the robot.
-    tool_joint_name : str
-        If provided, use the child link of this joint as the end effector. If
-        it is ``None``, then the link corresponding to the last joint is used.
+    tool_link_name : str
+        If provided, use this link as the end effector. If it is ``None``, then
+        the last link is used. The index of this link is stored in
+        ``self.tool_idx``.
     actuated_joint_names : iterable
         An optional list of actuated joint names. These joints will be
         "actuated", in that they take commands from the ``command_`` methods.
@@ -53,14 +41,14 @@ class Robot:
     Raises
     ------
     ValueError
-        If ``tool_joint_name`` is provided but the robot has no joint with that
+        If ``tool_link_name`` is provided but the robot has no link with that
         name.
     """
 
     def __init__(
         self,
         uid,
-        tool_joint_name=None,
+        tool_link_name=None,
         actuated_joint_names=None,
         client_id=0,
     ):
@@ -92,37 +80,47 @@ class Robot:
                 self._joint_index_map[name] for name in actuated_joint_names
             ]
 
-        if tool_joint_name is None:
+        if tool_link_name is None:
             self.tool_idx = n - 1
         else:
-            self.tool_idx = self.get_joint_index(tool_joint_name)
+            self.tool_idx = self.get_link_index(tool_link_name)
 
     @property
     def num_total_joints(self):
+        """int: The total number of joints, including fixed and moveable joints."""
         return len(self._joint_index_map)
 
     @property
     def num_moveable_joints(self):
+        """int: The number of moveable joints."""
         return len(self._moveable_joint_indices)
 
     @property
     def num_actuated_joints(self):
+        """int: The number of actuated (i.e., controlled) joints. This should
+        never be more than `num_joints`."""
         return len(self._actuated_joint_indices)
 
     @property
     def link_names(self):
+        """list: A list of all link names."""
         return list(self._link_index_map.keys())
 
     @property
     def all_joint_names(self):
+        """list: A list of all joint names, including fixed and moveable joints."""
         return list(self._joint_index_map.keys())
 
     @property
     def moveable_joint_names(self):
+        """list: A list of the names of the moveable joints."""
         return [self.all_joint_names[i] for i in self._moveable_joint_indices]
 
     @property
     def actuated_joint_names(self):
+        """list: A list of the actuated joint names. This is the same as the
+        list of joint names unless ``actuated_joint_names`` is provided to the
+        constructor."""
         return [self.all_joint_names[i] for i in self._actuated_joint_indices]
 
     def get_joint_index(self, name):

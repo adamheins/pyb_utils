@@ -43,8 +43,8 @@ def main():
     robot = load_environment(gui_id)
 
     # choose a random desired configuration to control the robot toward
-    qd = np.pi * (np.random.random(robot.num_joints) - 0.5)
-    K = np.eye(robot.num_joints)
+    qd = np.pi * (np.random.random(robot.num_moveable_joints) - 0.5)
+    K = np.eye(robot.num_moveable_joints)
 
     # fixed sphere above the robot
     ghost_fixed = pyb_utils.GhostObject.sphere(
@@ -56,7 +56,7 @@ def main():
         radius=0.1,
         color=(1, 0, 0, 0.5),
         parent_body_uid=robot.uid,
-        parent_link_index=robot.num_joints - 1,
+        parent_link_index=robot.tool_idx,
     )
 
     while True:

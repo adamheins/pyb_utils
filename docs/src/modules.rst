@@ -20,13 +20,7 @@ Collision
 .. automodule:: pyb_utils.collision
     :members:
     :undoc-members:
-    :exclude-members: NamedCollisionObject, IndexedCollisionObject
-
-.. autoclass:: pyb_utils.collision.NamedCollisionObject
-   :members: body_name, link_name
-
-.. autoclass:: pyb_utils.collision.IndexedCollisionObject
-   :members: body_uid, link_uid
+    :exclude-members: _IndexedCollisionObject
 
 Frame
 -----

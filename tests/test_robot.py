@@ -41,14 +41,14 @@ def test_robot_setup():
         assert robot1.get_joint_index(joint_name) == i
 
     # specify the tool joint by name
-    robot2 = pyb_utils.Robot(kuka_id, tool_joint_name="lbr_iiwa_joint_7")
+    robot2 = pyb_utils.Robot(kuka_id, tool_link_name="lbr_iiwa_link_7")
     assert robot2.num_total_joints == 7
     assert robot2.num_moveable_joints == 7
     assert robot2.num_actuated_joints == 7
     assert robot2.tool_idx == robot2.num_total_joints - 1
 
     # set tool as something other than last joint/link
-    robot3 = pyb_utils.Robot(kuka_id, tool_joint_name="lbr_iiwa_joint_6")
+    robot3 = pyb_utils.Robot(kuka_id, tool_link_name="lbr_iiwa_link_6")
     assert robot3.num_total_joints == 7
     assert robot3.num_moveable_joints == 7
     assert robot3.num_actuated_joints == 7
