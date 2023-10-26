@@ -124,9 +124,18 @@ def test_joint_states():
         )
     )
 
-
     state = pyb_utils.getJointState(robot.uid, 2)
     assert np.isclose(state.jointPosition, 0)
+
+    # no joint reaction forces reported with F/T sensor
+    assert np.allclose(state.jointReactionForces, np.zeros(6))
+
+    # now get the reaction forces with the F/T sensor
+    pyb.enableJointForceTorqueSensor(robot.uid, 2, enableSensor=1)
+    robot.command_velocity(np.ones(robot.num_actuated_joints))
+    pyb.stepSimulation()
+    state = pyb_utils.getJointState(robot.uid, 2)
+    assert np.linalg.norm(state.jointReactionForces) > 0
 
     states = pyb_utils.getJointStates(robot.uid, np.arange(robot.num_total_joints))
     assert len(states) == robot.num_total_joints
