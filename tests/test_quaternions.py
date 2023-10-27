@@ -1,6 +1,9 @@
+import math
+
 import numpy as np
-from spatialmath.base import rotz
+from spatialmath.base import rotx, roty, rotz
 import pyb_utils
+import pybullet as pyb
 
 
 def test_quaternions():
@@ -19,3 +22,22 @@ def test_quaternions():
 
     r = pyb_utils.quaternion_rotate(q, [1, 0, 0])
     assert np.allclose(r, [0, 1, 0])
+
+
+def _test_all_principal_angles(angle):
+    assert np.allclose(
+        pyb_utils.quatx(angle), pyb_utils.matrix_to_quaternion(rotx(angle))
+    )
+    assert np.allclose(
+        pyb_utils.quaty(angle), pyb_utils.matrix_to_quaternion(roty(angle))
+    )
+    assert np.allclose(
+        pyb_utils.quatz(angle), pyb_utils.matrix_to_quaternion(rotz(angle))
+    )
+
+
+def test_quat_principal_rotations():
+    _test_all_principal_angles(np.pi / 4)
+    _test_all_principal_angles(2.5 * np.pi)
+    _test_all_principal_angles(-np.pi)
+    _test_all_principal_angles(-2.5 * np.pi)

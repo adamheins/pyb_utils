@@ -8,6 +8,9 @@ from .math import (
     matrix_to_quaternion,
     quaternion_multiply,
     quaternion_rotate,
+    quatx,
+    quaty,
+    quatz,
 )
 from .named_tuples import (
     getClosestPoints,
