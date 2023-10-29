@@ -50,7 +50,7 @@ def main():
         width=200,
         height=200,
     )
-    video = pyb_utils.VideoRecorder("example.avi", camera, fps=FPS)
+    video = pyb_utils.VideoRecorder("example.mp4", camera, fps=FPS)
 
     # random target configuration
     qd = np.pi * (np.random.random(robot.num_moveable_joints) - 0.5)

@@ -137,13 +137,21 @@ utilities in the `examples/` directory:
 * [named tuples](examples/named_tuples_example.py)
 * [video](examples/video_example.py)
 
+## Video Output
+Writing a video with the `VideoRecorder` defaults to using the `mp4v` codec,
+which is widely supported but (at least on my computer running Ubuntu 20.04)
+does not play natively in web browsers. The availability of codecs depends on
+what is compiled into the version of OpenCV you have installed (i.e., the one
+backing the `cv2` Python module); using an alternative codec may require a
+different version of OpenCV.
+
 ## Known issues
 Feel free to open issues (or better yet, a pull request!) if you find a
 problem. Currently known issues:
 
-* Video recording does not output MP4 videos correctly. The AVI format works,
-  however.
 * Ghost objects sometimes flicker (spooky, but undesirable).
+* The field name `localInerialPos` in the `DynamicsInfo` named tuple is spelled
+  incorrectly. This will be fixed in a future major version.
 
 ## Development
 * Run `tox` to run the tests.
