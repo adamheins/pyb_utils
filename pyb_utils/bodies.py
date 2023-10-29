@@ -193,7 +193,7 @@ class BulletBody:
         )
 
     def get_pose(self, as_rotation_matrix=False):
-        """Get the position and orientation of the body.
+        """Get the position and orientation of the body's inertial frame.
 
         Parameters
         ----------
@@ -220,7 +220,7 @@ class BulletBody:
         return pos, orn
 
     def get_velocity(self):
-        """Get the velocity of the body.
+        """Get the velocity of the body's inertial frame.
 
         Returns
         -------
@@ -234,7 +234,7 @@ class BulletBody:
         return np.array(linear), np.array(angular)
 
     def set_pose(self, position=None, orientation=None):
-        """Set the position and orientation of the body.
+        """Set the position and orientation of the body's inertial frame.
 
         Parameters
         ----------
@@ -257,7 +257,7 @@ class BulletBody:
         )
 
     def set_velocity(self, linear=None, angular=None):
-        """Set the velocity of the body.
+        """Set the velocity of the body's inertial frame.
 
         Parameters
         ----------
@@ -283,7 +283,8 @@ class BulletBody:
     def apply_wrench(
         self, force=None, torque=None, position=None, frame=pyb.LINK_FRAME
     ):
-        """Apply a wrench (i.e., force and torque) to the body.
+        """Apply a wrench (i.e., force and torque) to the body about its
+        inertial frame.
 
         Parameters
         ----------
@@ -295,8 +296,8 @@ class BulletBody:
             Position at which to apply the force. If not provided, force acts
             at the origin of the specified frame. Has no effect on the torque.
         frame : int
-            The coordinate frame. Can be either ``pyb.LINK_FRAME`` (the default) or
-            ``pyb.WORLD_FRAME``.
+            The coordinate frame (i.e., orientation). Can be either
+            ``pyb.LINK_FRAME`` (the default) or ``pyb.WORLD_FRAME``.
         """
         if position is None:
             position = np.zeros(3)

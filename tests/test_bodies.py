@@ -38,6 +38,23 @@ def test_body_methods():
     box.apply_wrench(force=[1, 0, 0], torque=[0, 0, 5])
 
 
+def test_body_offset_inertial_frame():
+    orn = (0, 0, 1, 0)
+
+    # body base is placed 0.5 units up but inertial frame is then offset 0.5
+    # units down: it is at the origin
+    box = pyb_utils.BulletBody.box(
+        [0, 0, 0.5],
+        half_extents=[0.5, 0.5, 0.5],
+        baseInertialFramePosition=(0, 0, -0.5),
+        baseInertialFrameOrientation=orn,
+    )
+
+    r, Q = box.get_pose()
+    assert np.allclose(r, np.zeros(3))
+    assert np.allclose(Q, orn)
+
+
 def test_body_types():
     # create each type of body to ensure no errors
     box = pyb_utils.BulletBody.box([0, 0, 0.5], half_extents=[0.5, 0.5, 0.5])
