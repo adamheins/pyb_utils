@@ -1,6 +1,11 @@
 from .bodies import BulletBody
 from .camera import Camera, VideoRecorder
 from .collision import CollisionDetector
+from .contact import (
+    get_point_contact_wrench,
+    get_points_contact_wrench,
+    get_total_contact_wrench,
+)
 from .frame import debug_frame, debug_frame_world
 from .ghost import GhostObject
 from .math import (
