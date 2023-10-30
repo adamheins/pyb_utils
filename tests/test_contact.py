@@ -40,6 +40,11 @@ def test_contact_wrench_static():
     assert np.allclose(force, -GRAVITY, rtol=0, atol=1e-3)
     assert np.allclose(torque, np.zeros(3), rtol=0, atol=1e-3)
 
+    # equal and opposite wrench acting on the other body
+    force2, torque2 = pyb_utils.get_total_contact_wrench(ground_uid, box.uid)
+    assert np.allclose(force, -force2)
+    assert np.allclose(torque, -torque2)
+
 
 def test_contact_wrench_pure_applied_force1():
     ground_uid, box = _sim_env()
@@ -47,10 +52,19 @@ def test_contact_wrench_pure_applied_force1():
     f_app = np.array([1, 0, 0])
     box.apply_wrench(force=f_app, frame=pyb.LINK_FRAME)
     pyb.stepSimulation()
-    force, _ = pyb_utils.get_total_contact_wrench(
+    force, torque = pyb_utils.get_total_contact_wrench(
         box.uid, ground_uid, origin=[0, 0, 0.5]
     )
     assert np.allclose(force, -f_app - GRAVITY, rtol=0, atol=5e-2)
+
+    force2, torque2 = pyb_utils.get_total_contact_wrench(
+        ground_uid, box.uid, origin=[0, 0, 0.5]
+    )
+    assert np.allclose(force, -force2)
+
+    # torque in not perfect since there are slight differences in the contact
+    # point positions on body A and B, due to small penetrations
+    assert np.allclose(torque, -torque2, rtol=0, atol=1e-3)
 
 
 def test_contact_wrench_pure_applied_force2():
@@ -64,6 +78,12 @@ def test_contact_wrench_pure_applied_force2():
     )
     assert np.allclose(force, -f_app - GRAVITY, rtol=0, atol=5e-2)
 
+    force2, torque2 = pyb_utils.get_total_contact_wrench(
+        ground_uid, box.uid, origin=[0, 0, 0.5]
+    )
+    assert np.allclose(force, -force2)
+    assert np.allclose(torque, -torque2, rtol=0, atol=1e-3)
+
 
 def test_contact_wrench_pure_applied_torque():
     ground_uid, box = _sim_env()
@@ -76,6 +96,12 @@ def test_contact_wrench_pure_applied_torque():
     )
     assert np.allclose(force, -GRAVITY, rtol=0, atol=1e-2)
     assert np.allclose(torque, -τ_app, rtol=0, atol=1e-2)
+
+    force2, torque2 = pyb_utils.get_total_contact_wrench(
+        ground_uid, box.uid, origin=[0, 0, 0.5]
+    )
+    assert np.allclose(force, -force2)
+    assert np.allclose(torque, -torque2, rtol=0, atol=1e-3)
 
 
 def test_contact_wrench_offset_force():
@@ -91,3 +117,9 @@ def test_contact_wrench_offset_force():
     assert np.isclose(force[0], -f_app[0], atol=5e-2)
     assert np.isclose(force[2], -GRAVITY[2], atol=5e-2)
     assert np.isclose(torque[2], -np.cross(p_app, f_app)[2], atol=5e-2)
+
+    force2, torque2 = pyb_utils.get_total_contact_wrench(
+        ground_uid, box.uid, origin=[0, 0, 0.5]
+    )
+    assert np.allclose(force, -force2)
+    assert np.allclose(torque, -torque2, rtol=0, atol=1e-3)
