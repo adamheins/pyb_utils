@@ -1,5 +1,6 @@
 """The module provides basic quaternion operations."""
 import numpy as np
+from spatialmath.base import r2q
 from spatialmath import UnitQuaternion as UQ
 
 
@@ -40,7 +41,11 @@ def matrix_to_quaternion(C):
         The quaternion :math:`(x, y, z, w)` representing the same rotation as
         ``C``.
     """
-    return UQ(C).vec_xyzs
+    # use r2q explicitly for now since spatialmath may silently fail to convert
+    # the rotation (see
+    # https://github.com/bdaiinstitute/spatialmath-python/pull/87)
+    q = r2q(C, order="xyzs")
+    return _UQ(q).vec_xyzs
 
 
 def quaternion_multiply(q0, q1, normalize=True):
