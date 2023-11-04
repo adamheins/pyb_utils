@@ -18,7 +18,7 @@ def main():
     pyb.setTimeStep(TIMESTEP)
     pyb.setGravity(0, 0, -9.81)
     pyb.setAdditionalSearchPath(pybullet_data.getDataPath())
-    pyb.loadURDF("plane.urdf", [0, 0, 0], useFixedBase=True)
+    ground_uid = pyb.loadURDF("plane.urdf", [0, 0, 0], useFixedBase=True)
 
     # create some objects
     box = pyb_utils.BulletBody.box([0, 0, 0.5], half_extents=[0.5, 0.5, 0.5])
@@ -53,6 +53,10 @@ def main():
     for _ in range(2 * STEPS_PER_SEC):
         pyb.stepSimulation()
         time.sleep(TIMESTEP)
+
+    # we can get the contact wrench between objects
+    force, torque = pyb_utils.get_total_contact_wrench(cylinder.uid, ground_uid)
+    print(f"ground reaction force on cylinder = {force}")
 
 
 if __name__ == "__main__":

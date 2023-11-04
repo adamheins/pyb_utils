@@ -123,3 +123,43 @@ def test_contact_wrench_offset_force():
     )
     assert np.allclose(force, -force2)
     assert np.allclose(torque, -torque2, rtol=0, atol=1e-3)
+
+
+def test_contact_wrench_incline():
+    Q = pyb_utils.quaty(-np.pi / 8)
+    r = pyb_utils.quaternion_rotate(Q, [0, 0, 0.5])
+
+    ground = pyb_utils.BulletBody.box(
+        position=[0, 0, -0.05],
+        orientation=Q,
+        half_extents=[10, 10, 0.1],
+        mass=0,
+        color=(0, 0, 1, 1),
+    )
+    box = pyb_utils.BulletBody.box(
+        position=r,
+        orientation=Q,
+        half_extents=[0.5, 0.5, 0.5],
+        mass=1.0,
+    )
+
+    # sufficient friction to prevent sliding
+    pyb.changeDynamics(ground.uid, -1, lateralFriction=1.0)
+    pyb.changeDynamics(box.uid, -1, lateralFriction=0.5)
+
+    # settle for a while: the incline seems to takes longer to really converge
+    for _ in range(1000):
+        pyb.stepSimulation()
+
+    # in the world frame, the reaction forces still just resolve to resist
+    # gravity
+    force, torque = pyb_utils.get_total_contact_wrench(
+        box.uid, ground.uid, origin=r
+    )
+    assert np.allclose(force, -GRAVITY, rtol=0, atol=1e-5)
+
+    force2, torque2 = pyb_utils.get_total_contact_wrench(
+        ground.uid, box.uid, origin=r
+    )
+    assert np.allclose(force, -force2)
+    assert np.allclose(torque, -torque2, rtol=0, atol=1e-3)

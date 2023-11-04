@@ -14,6 +14,13 @@ Camera
     :members:
     :undoc-members:
 
+Contact
+---------
+
+.. automodule:: pyb_utils.contact
+    :members:
+    :undoc-members:
+
 Collision
 ---------
 
