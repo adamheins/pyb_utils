@@ -46,14 +46,16 @@ python -m pip install .
 The project's documention is available [here](https://pyb-utils.readthedocs.io).
 
 ## Usage and examples
-This package provides a few basic quality of life utilities. First, PyBullet
+This package provides a few basic quality-of-life utilities. First, PyBullet
 represents rotations using quaternions (in `[x, y, z, w]` order). We provide a
 few helper routines to convert to rotation matrices and rotate points (using
 [spatialmath](https://github.com/bdaiinstitute/spatialmath-python) under the
 hood):
 ```python
 >>> import pyb_utils
->>> q = (0, 0, np.sqrt(2) / 2, np.sqrt(2) / 2)  # 90 deg rotation about z-axis
+>>> q = pyb_utils.quatz(np.pi / 2) # 90 deg rotation about z-axis
+>>> q
+array([0., 0., 0.70710678, 0.70710678])
 
 >>> pyb_utils.quaternion_to_matrix(q)  # convert to rotation matrix
 array([[-0.,  -1.,  0.],
@@ -61,7 +63,7 @@ array([[-0.,  -1.,  0.],
        [ 0.,   0.,  1.]])
 
 >>> pyb_utils.quaternion_multiply(q, q)  # rotate two quaternions together
-array([0, 0, -1, 0])                     # 180 deg rotate about z
+array([0, 0, 1, 0])                      # 180 deg rotate about z
 
 >>> pyb_utils.quaternion_rotate(q, [1, 0, 0])  # rotate a point
 array([0, 1, 0])

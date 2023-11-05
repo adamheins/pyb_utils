@@ -15,7 +15,7 @@ DynamicsInfo = namedtuple(
         "mass",
         "lateralFriction",
         "localInertiaDiagonal",
-        "localInerialPos",
+        "localInerialPos",  # TODO fix this name in a future major release
         "localInertialOrn",
         "restitution",
         "rollingFriction",
