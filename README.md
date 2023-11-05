@@ -48,7 +48,8 @@ The project's documention is available [here](https://pyb-utils.readthedocs.io).
 ## Usage and examples
 This package provides a few basic quality-of-life utilities. First, PyBullet
 represents rotations using quaternions (in `[x, y, z, w]` order). We provide a
-few helper routines to convert to rotation matrices and rotate points (using
+few helper routines to create quaternions about the principal axes, convert
+quaternions to rotation matrices, and to rotate points (using
 [spatialmath](https://github.com/bdaiinstitute/spatialmath-python) under the
 hood):
 ```python
@@ -115,8 +116,8 @@ example:
 >>> info = pyb_utils.getDynamicsInfo(box.uid, -1)
 >>> info.mass
 1.0
->>> info.localInertiaPos
-(0.0, 0.0, 0.0)
+>>> info.localInertiaDiagonal
+(0.16666666666666666, 0.16666666666666666, 0.16666666666666666),
 ```
 The functions we've wrapped in this way are `getClosestPoints`,
 `getConstraintInfo`, `getContactPoints`, `getDynamicsInfo`, `getJointInfo`,
