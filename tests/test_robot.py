@@ -2,7 +2,6 @@ import numpy as np
 import pybullet as pyb
 import pybullet_data
 from robot_descriptions.loaders.pybullet import load_robot_description
-from spatialmath.base import rotz
 import pyb_utils
 
 
@@ -108,8 +107,7 @@ def test_robot_link_pose():
     r0_com = robot.get_link_com_pose()[0]
     assert np.allclose(r0_com, r0 + C0 @ offset)
 
-    Cz = rotz(np.pi / 2)
-    Qz = pyb_utils.matrix_to_quaternion(Cz)
+    Qz = pyb_utils.quatz(np.pi / 2)
 
     robot.reset_joint_configuration([np.pi / 2, 0, 0, 0, 0, 0, 0])
     r1, Q1 = robot.get_link_frame_pose()

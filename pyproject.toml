@@ -13,10 +13,10 @@ readme = "README.md"
 python = ">=3.8,<3.12"
 numpy = "^1.22.0"
 pybullet = "^3.2.1"
-spatialmath-python = ">=1.0.0"
 Pillow = ">=10.0.1"
 matplotlib = "^3.5.1"
 opencv-python = "^4.5.5"
+scipy = ">=1.10.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
