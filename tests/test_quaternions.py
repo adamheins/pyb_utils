@@ -26,13 +26,16 @@ def test_quaternions():
 
 def _test_all_principal_angles(angle):
     assert np.allclose(
-        pyb_utils.quatx(angle), pyb_utils.matrix_to_quaternion(rotx(angle))
+        pyb_utils.quatx(angle),
+        pyb_utils.matrix_to_quaternion(pyb_utils.rotx(angle)),
     )
     assert np.allclose(
-        pyb_utils.quaty(angle), pyb_utils.matrix_to_quaternion(roty(angle))
+        pyb_utils.quaty(angle),
+        pyb_utils.matrix_to_quaternion(pyb_utils.roty(angle)),
     )
     assert np.allclose(
-        pyb_utils.quatz(angle), pyb_utils.matrix_to_quaternion(rotz(angle))
+        pyb_utils.quatz(angle),
+        pyb_utils.matrix_to_quaternion(pyb_utils.rotz(angle)),
     )
 
 
