@@ -101,6 +101,42 @@ class GhostObject:
             parent_body_uid=parent_body_uid,
             parent_link_index=parent_link_index,
         )
+ 
+    @classmethod
+    def box(
+        cls, position, half_extents,parent_body_uid=None,
+        parent_link_index=-1, color=(1, 0, 0, 1),  **kwargs
+    ):
+        """Create a cuboid ghost.
+
+        Parameters
+        ----------
+        position : iterable
+            The `(x, y, z)` position of the box in the world.
+        half_extents : iterable
+            The three half lengths of the box.
+        parent_body_uid : int
+            The UID of an existing body to "attach" this object to (optional).
+        parent_link_index : int
+            The index of the link on the parent body to attach this object to
+            (optional). Defaults to `-1` (the base link).
+        color : iterable
+            The `(r, g, b, α)` color of the box.
+        client_id : int
+            Physics client ID; only required if connected to multiple servers.
+        """
+       
+        visual_uid = pyb.createVisualShape(
+            shapeType=pyb.GEOM_BOX,
+            halfExtents=tuple(half_extents),
+            rgbaColor=tuple(color),
+        )
+        return cls(
+            visual_uid,
+            position=position,
+            parent_body_uid=parent_body_uid,
+            parent_link_index=parent_link_index,
+        )       
 
     def _compute_world_position(self):
         # If the object is attached to a parent, then its position and
