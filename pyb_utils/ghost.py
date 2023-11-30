@@ -89,7 +89,7 @@ class GhostObject:
         color : iterable
             The ``(r, g, b, α)`` color of the sphere (optional). Defaults to
             red.
-            """
+        """
         visual_uid = pyb.createVisualShape(
             shapeType=pyb.GEOM_SPHERE,
             radius=radius,
@@ -101,11 +101,16 @@ class GhostObject:
             parent_body_uid=parent_body_uid,
             parent_link_index=parent_link_index,
         )
- 
+
     @classmethod
     def box(
-        cls, position, half_extents,parent_body_uid=None,
-        parent_link_index=-1, color=(1, 0, 0, 1),  **kwargs
+        cls,
+        position,
+        half_extents,
+        parent_body_uid=None,
+        parent_link_index=-1,
+        color=(1, 0, 0, 1),
+        **kwargs
     ):
         """Create a cuboid ghost.
 
@@ -122,10 +127,8 @@ class GhostObject:
             (optional). Defaults to `-1` (the base link).
         color : iterable
             The `(r, g, b, α)` color of the box.
-        client_id : int
-            Physics client ID; only required if connected to multiple servers.
         """
-       
+
         visual_uid = pyb.createVisualShape(
             shapeType=pyb.GEOM_BOX,
             halfExtents=tuple(half_extents),
@@ -136,7 +139,7 @@ class GhostObject:
             position=position,
             parent_body_uid=parent_body_uid,
             parent_link_index=parent_link_index,
-        )       
+        )
 
     def _compute_world_position(self):
         # If the object is attached to a parent, then its position and
@@ -196,5 +199,7 @@ class GhostObject:
 def GhostSphere(*args, **kwargs):
     import logging
 
-    logging.warning("GhostSphere is deprecated. Use GhostObject.sphere instead.")
+    logging.warning(
+        "GhostSphere is deprecated. Use GhostObject.sphere instead."
+    )
     return GhostObject.sphere(*args, **kwargs)
