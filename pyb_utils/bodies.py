@@ -215,6 +215,7 @@ class BulletBody:
         )
         pos = np.array(pos)
         orn = np.array(orn)
+        orn /= np.linalg.norm(orn)
         if as_rotation_matrix:
             orn = quaternion_to_matrix(orn)
         return pos, orn
