@@ -330,6 +330,7 @@ class Robot:
         )
         position = np.array(state.linkWorldPosition)
         orientation = np.array(state.linkWorldOrientation)
+        orientation /= np.linalg.norm(orientation)
         if as_rotation_matrix:
             orientation = quaternion_to_matrix(orientation)
         return position, orientation
@@ -367,6 +368,7 @@ class Robot:
         )
         position = np.array(state.worldLinkFramePosition)
         orientation = np.array(state.worldLinkFrameOrientation)
+        orientation /= np.linalg.norm(orientation)
         if as_rotation_matrix:
             orientation = quaternion_to_matrix(orientation)
         return position, orientation
