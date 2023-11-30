@@ -40,6 +40,7 @@ class GhostObject:
         orientation=None,
         parent_body_uid=None,
         parent_link_index=-1,
+        client_id=0,
     ):
         if position is None:
             position = (0, 0, 0)
@@ -59,6 +60,7 @@ class GhostObject:
             baseVisualShapeIndex=visual_uid,
             basePosition=list(world_position),
             baseOrientation=list(world_orientation),
+            physicsClientId=client_id,
         )
 
     @classmethod
@@ -69,6 +71,7 @@ class GhostObject:
         parent_body_uid=None,
         parent_link_index=-1,
         color=(1, 0, 0, 1),
+        client_id=0,
     ):
         """Create a spherical ghost object.
 
@@ -100,6 +103,7 @@ class GhostObject:
             position=position,
             parent_body_uid=parent_body_uid,
             parent_link_index=parent_link_index,
+            client_id=client_id,
         )
 
     @classmethod
@@ -110,7 +114,7 @@ class GhostObject:
         parent_body_uid=None,
         parent_link_index=-1,
         color=(1, 0, 0, 1),
-        **kwargs
+        client_id=0,
     ):
         """Create a cuboid ghost.
 
@@ -139,6 +143,7 @@ class GhostObject:
             position=position,
             parent_body_uid=parent_body_uid,
             parent_link_index=parent_link_index,
+            client_id=client_id,
         )
 
     def _compute_world_position(self):

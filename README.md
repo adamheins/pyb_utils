@@ -24,7 +24,7 @@ pip install pyb_utils
 ```
 
 ### From source
-Clone the repo:
+Clone the repository:
 ```bash
 git clone https://github.com/adamheins/pyb_utils
 cd pyb_utils
@@ -43,7 +43,7 @@ python -m pip install .
 
 ## Documentation
 
-The project's documention is available [here](https://pyb-utils.readthedocs.io).
+The project's documentation is available [here](https://pyb-utils.readthedocs.io).
 
 ## Usage and examples
 This package provides a few basic quality-of-life utilities. First, PyBullet
@@ -124,7 +124,7 @@ The functions we've wrapped in this way are `getClosestPoints`,
 `getJointState(s)`, and `getLinkState(s)`. There are two differences from the
 vanilla PyBullet API. The first is that in pyb_utils `getJointInfo` also
 accepts an optional argument `decode`, which will convert the byte strings
-returned by PyBullet to the specifed encoding. For example, `decode="utf8"`.
+returned by PyBullet to the specified encoding. For example, `decode="utf8"`.
 The second difference is that in pyb_utils `getLinkState(s)` will always return
 `LinkState` tuples with 8 fields, even if `computeLinkVelocity=False`. When
 `computeLinkVelocity=False`, then `worldLinkLinearVelocity` and
@@ -152,9 +152,15 @@ different version of OpenCV.
 Feel free to open issues (or better yet, a pull request!) if you find a
 problem. Currently known issues:
 
-* Ghost objects sometimes flicker (spooky, but undesirable).
+* Ghost objects sometimes flicker (spooky, but undesirable). This is probably
+  because they are updated by directly changing the object pose; we cannot
+  have them updated automatically by, e.g., constraints since they are not
+  dynamic objects (and we wouldn't want them to be; then they would influence
+  the simulation).
 * The field name `localInerialPos` in the `DynamicsInfo` named tuple is spelled
   incorrectly. This will be fixed in a future major version.
+* The deprecated `GhostSphere` class will be removed in a future major version.
+  Use `GhostObject.sphere` instead.
 
 ## Development
 * Run `tox` to run the tests.
