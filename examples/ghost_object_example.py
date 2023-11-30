@@ -47,8 +47,8 @@ def main():
     K = np.eye(robot.num_moveable_joints)
 
     # fixed sphere above the robot
-    ghost_fixed = pyb_utils.GhostObject.sphere(
-        radius=0.1, color=(0, 1, 0, 0.5), position=(0, 0, 2)
+    ghost_fixed = pyb_utils.GhostObject.box(
+        half_extents=0.1 * np.ones(3), color=(0, 1, 0, 0.5), position=(0, 0, 2)
     )
 
     # sphere attached to the robot's end effector
