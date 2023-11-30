@@ -4,3 +4,4 @@
 dist/
 .tox/
 .venv/
+*pyc
