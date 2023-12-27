@@ -1,5 +1,5 @@
 from .bodies import BulletBody
-from .camera import Camera, VideoRecorder
+from .camera import Camera, VideoRecorder, FrameRecorder
 from .collision import CollisionDetector
 from .contact import (
     get_point_contact_wrench,

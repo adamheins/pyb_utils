@@ -1,4 +1,6 @@
 """This module provides a utility ``Camera`` class for PyBullet."""
+from pathlib import Path
+
 import numpy as np
 import pybullet as pyb
 from PIL import Image
@@ -166,7 +168,9 @@ class Camera:
 
         # the image has height rows x width columns
         return (
-            np.array(rgba, dtype=np.uint8).reshape((self.height, self.width, 4)),
+            np.array(rgba, dtype=np.uint8).reshape(
+                (self.height, self.width, 4)
+            ),
             np.array(depth).reshape((self.height, self.width)),
             np.array(seg).reshape((self.height, self.width)),
         )
@@ -180,8 +184,8 @@ class Camera:
             The name of the image file.
         rgba : np.ndarray
             Optionally, the user can provide the RGBA data from a previous call
-            to ``Camera.get_frame()``. If not provided, ``self.get_frame()`` is
-            called to retrieve this data.
+            to :meth:`Camera.get_frame()`. If not provided,
+            ``self.get_frame()`` is called to retrieve this data.
         """
         if rgba is None:
             rgba, _, _ = self.get_frame()
@@ -196,7 +200,7 @@ class Camera:
         ----------
         depth : np.ndarray
             Optionally, the user can provide the depth buffer from a previous
-            call to ``Camera.get_frame()``. If not provided,
+            call to :meth:`Camera.get_frame()`. If not provided,
             ``self.get_frame()`` is called to retrieve this data.
 
         Returns
@@ -244,7 +248,7 @@ class Camera:
         ----------
         depth : np.ndarray
             Optionally, the user can provide the depth buffer from a previous
-            call to ``Camera.get_frame()``. If not provided,
+            call to :meth:`Camera.get_frame()`. If not provided,
             ``self.get_frame()`` is called to retrieve this data.
 
         Returns
@@ -321,7 +325,7 @@ class VideoRecorder:
         ----------
         rgba : np.ndarray
             Optionally, the user can provide the RGBA data from a previous call
-            to ``Camera.get_frame()``. This can be used to avoid multiple
+            to :meth:`Camera.get_frame()`. This can be used to avoid multiple
             renderings with the camera. If not provided,
             ``self.camera.get_frame()`` is called to retrieve this data.
         """
@@ -331,3 +335,62 @@ class VideoRecorder:
         # OpenCV uses BGR instead of RGB
         bgr = rgba[..., [2, 1, 0]]
         self.writer.write(bgr)
+
+
+class FrameRecorder:
+    """Recorder for a set of frames from a PyBullet simulation.
+
+    This is an alternative to the :class:`VideoRecorder`, which directly saves
+    a video.
+
+    Parameters
+    ----------
+    camera : Camera
+        Camera object to use for rendering frames.
+    fps : int
+        Frames per second. Each ``fps`` frames will be played over one second
+        of video.
+    dirname : str
+        The name of the directory to write the frames to. The directory will be
+        created if it doesn't already exist.
+    """
+    def __init__(self, camera, fps=25, dirname=None):
+        self.camera = camera
+        self.timestep = 1.0 / fps
+        self.save = not (dirname is None)
+
+        if self.save:
+            self.path = Path(dirname)
+            self.path.mkdir(exist_ok=True)
+
+        self.frame_count = 0
+        self.last_record_time = -np.inf
+
+    def capture_frame(self, t, rgba=None):
+        """Capture and save a frame if enough time has past since the last
+        capture.
+
+        This does nothing if less than ``1. / fps`` time has elapsed since the
+        last frame was captured.
+
+        Parameters
+        ----------
+        t : float
+            The current time.
+        rgba :
+            Image data as returned by :meth:`Camera.get_frame`. Otherwise,
+            ``self.camera.get_frame`` is called to retrieve this data.
+        """
+        if not self.save:
+            return
+
+        # bail if not enough time has elapsed to record a new frame
+        if t < self.last_record_time + self.timestep:
+            return
+
+        # capture and save the frame
+        frame_path = self.path / f"frame_{self.frame_count}.png"
+        self.camera.save_frame(frame_path, rgba=rgba)
+
+        self.frame_count += 1
+        self.last_record_time = t
