@@ -16,6 +16,10 @@ from .math import (
     quatx,
     quaty,
     quatz,
+    rot2,
+    rotx,
+    roty,
+    rotz,
 )
 from .named_tuples import (
     getClosestPoints,

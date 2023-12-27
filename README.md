@@ -50,8 +50,8 @@ This package provides a few basic quality-of-life utilities. First, PyBullet
 represents rotations using quaternions (in `[x, y, z, w]` order). We provide a
 few helper routines to create quaternions about the principal axes, convert
 quaternions to rotation matrices, and to rotate points (using
-[spatialmath](https://github.com/bdaiinstitute/spatialmath-python) under the
-hood):
+[scipy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.html)
+under the hood):
 ```python
 >>> import pyb_utils
 >>> q = pyb_utils.quatz(np.pi / 2) # 90 deg rotation about z-axis

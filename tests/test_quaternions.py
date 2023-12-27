@@ -1,7 +1,4 @@
-import math
-
 import numpy as np
-from spatialmath.base import rotx, roty, rotz
 import pyb_utils
 import pybullet as pyb
 
@@ -12,28 +9,41 @@ def test_quaternions():
     q = (0, 0, np.sqrt(2) / 2, np.sqrt(2) / 2)
 
     C = pyb_utils.quaternion_to_matrix(q)
-    assert np.allclose(C, rotz(angle))
+    assert np.allclose(C, pyb_utils.rotz(angle))
 
-    # better to test in rotation matrix form since q2 can be one of two values
-    # (negatives of each other) due to double-cover of SO(3)
     q2 = pyb_utils.quaternion_multiply(q, q)
-    C2 = pyb_utils.quaternion_to_matrix(q2)
-    assert np.allclose(C2, rotz(2 * angle))
+    assert np.allclose(q2, pyb_utils.quatz(2 * angle))
 
     r = pyb_utils.quaternion_rotate(q, [1, 0, 0])
     assert np.allclose(r, [0, 1, 0])
 
 
 def _test_all_principal_angles(angle):
+    C2 = pyb_utils.rot2(angle)
+
+    Cx = pyb_utils.rotx(angle)
     assert np.allclose(
-        pyb_utils.quatx(angle), pyb_utils.matrix_to_quaternion(rotx(angle))
+        pyb_utils.quatx(angle),
+        pyb_utils.matrix_to_quaternion(Cx),
     )
+    assert np.allclose(Cx @ [1, 0, 0], [1, 0, 0])
+    assert np.allclose(Cx[1:, 1:], C2)
+
+    Cy = pyb_utils.roty(angle)
     assert np.allclose(
-        pyb_utils.quaty(angle), pyb_utils.matrix_to_quaternion(roty(angle))
+        pyb_utils.quaty(angle),
+        pyb_utils.matrix_to_quaternion(Cy),
     )
+    assert np.allclose(Cy @ [0, 1, 0], [0, 1, 0])
+    assert np.allclose(Cy[[0, 2], :][:, [0, 2]], C2.T)
+
+    Cz = pyb_utils.rotz(angle)
     assert np.allclose(
-        pyb_utils.quatz(angle), pyb_utils.matrix_to_quaternion(rotz(angle))
+        pyb_utils.quatz(angle),
+        pyb_utils.matrix_to_quaternion(Cz),
     )
+    assert np.allclose(Cz @ [0, 0, 1], [0, 0, 1])
+    assert np.allclose(Cz[:2, :2], C2)
 
 
 def test_quat_principal_rotations():
