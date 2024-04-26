@@ -192,7 +192,7 @@ class GhostObject:
         if position is not None:
             self.position = np.array(position)
         if orientation is not None:
-            orientation = np.array(orientation)
+            self.orientation = np.array(orientation)
 
         world_position, world_orientation = self._compute_world_position()
 
