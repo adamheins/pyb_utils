@@ -1,4 +1,5 @@
 """This modules provides visible oriented frames for debugging the simulation."""
+from typing import Iterable, Tuple
 
 import pybullet as pyb
 
@@ -7,10 +8,10 @@ from .math import quaternion_rotate
 
 def debug_frame_world(
     size: float,
-    origin: tuple[float],
-    orientation: tuple[float] = (0, 0, 0, 1),
+    origin: Iterable[float],
+    orientation: Iterable[float] = (0, 0, 0, 1),
     line_width: float = 1,
-) -> tuple[int]:
+) -> Tuple[int]:
     """Attach a frame to the world for debugging purposes.
 
     Parameters
@@ -53,7 +54,7 @@ def debug_frame_world(
     return l1, l2, l3
 
 
-def debug_frame(size: float, obj_uid: int, link_index: int) -> tuple[int]:
+def debug_frame(size: float, obj_uid: int, link_index: int) -> Tuple[int]:
     """Attach a frame to a link for debugging purposes.
 
     Parameters
