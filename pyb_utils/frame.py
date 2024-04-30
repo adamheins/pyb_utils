@@ -25,8 +25,8 @@ def debug_frame_world(
         Width of the lines that make up the frame.
     Returns
     -------
-    :
-        tuple[int] : pybullet ids of the lines
+    : tuple[int]
+        : pybullet ids of the lines
     """
     dx = quaternion_rotate(orientation, [size, 0, 0])
     dy = quaternion_rotate(orientation, [0, size, 0])
@@ -67,8 +67,8 @@ def debug_frame(size: float, obj_uid: int, link_index: int) -> tuple[int]:
         base link.
     Returns
     -------
-    :
-        tuple[int] : pybullet ids of the lines
+    : tuple[int]
+        : pybullet ids of the lines
     """
     l1 = pyb.addUserDebugLine(
         [0, 0, 0],
