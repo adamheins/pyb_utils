@@ -26,7 +26,7 @@ def debug_frame_world(
     Returns
     -------
     : tuple[int]
-        : pybullet ids of the lines
+        pybullet ids of the lines
     """
     dx = quaternion_rotate(orientation, [size, 0, 0])
     dy = quaternion_rotate(orientation, [0, size, 0])
@@ -68,7 +68,7 @@ def debug_frame(size: float, obj_uid: int, link_index: int) -> tuple[int]:
     Returns
     -------
     : tuple[int]
-        : pybullet ids of the lines
+        pybullet ids of the lines
     """
     l1 = pyb.addUserDebugLine(
         [0, 0, 0],
