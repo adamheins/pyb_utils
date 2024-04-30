@@ -1,10 +1,13 @@
 """This modules provides visible oriented frames for debugging the simulation."""
+
 import pybullet as pyb
 
 from .math import quaternion_rotate
 
 
-def debug_frame_world(size, origin, orientation=(0, 0, 0, 1), line_width=1):
+def debug_frame_world(
+    size, origin, orientation=(0, 0, 0, 1), line_width=1
+) -> tuple[int]:
     """Attach a frame to the world for debugging purposes.
 
     Parameters
@@ -17,29 +20,32 @@ def debug_frame_world(size, origin, orientation=(0, 0, 0, 1), line_width=1):
         A quaternion :math:`(x, y, z, w)` represented the frame's orientation.
     line_width : float
         Width of the lines that make up the frame.
+    Returns:
+        tuple[int] : pybullet ids of the lines
     """
     dx = quaternion_rotate(orientation, [size, 0, 0])
     dy = quaternion_rotate(orientation, [0, size, 0])
     dz = quaternion_rotate(orientation, [0, 0, size])
 
-    pyb.addUserDebugLine(
+    l1 = pyb.addUserDebugLine(
         origin,
         list(dx + origin),
         lineColorRGB=[1, 0, 0],
         lineWidth=line_width,
     )
-    pyb.addUserDebugLine(
+    l2 = pyb.addUserDebugLine(
         origin,
         list(dy + origin),
         lineColorRGB=[0, 1, 0],
         lineWidth=line_width,
     )
-    pyb.addUserDebugLine(
+    l3 = pyb.addUserDebugLine(
         origin,
         list(dz + origin),
         lineColorRGB=[0, 0, 1],
         lineWidth=line_width,
     )
+    return l1, l2, l3
 
 
 def debug_frame(size, obj_uid, link_index):
