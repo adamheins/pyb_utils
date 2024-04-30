@@ -6,7 +6,10 @@ from .math import quaternion_rotate
 
 
 def debug_frame_world(
-    size, origin, orientation=(0, 0, 0, 1), line_width=1
+    size: float,
+    origin: tuple[float],
+    orientation: tuple[float] = (0, 0, 0, 1),
+    line_width: float = 1,
 ) -> tuple[int]:
     """Attach a frame to the world for debugging purposes.
 
@@ -20,7 +23,9 @@ def debug_frame_world(
         A quaternion :math:`(x, y, z, w)` represented the frame's orientation.
     line_width : float
         Width of the lines that make up the frame.
-    Returns:
+    Returns
+    -------
+    :
         tuple[int] : pybullet ids of the lines
     """
     dx = quaternion_rotate(orientation, [size, 0, 0])
@@ -48,7 +53,7 @@ def debug_frame_world(
     return l1, l2, l3
 
 
-def debug_frame(size, obj_uid, link_index):
+def debug_frame(size: float, obj_uid: int, link_index: int) -> tuple[int]:
     """Attach a frame to a link for debugging purposes.
 
     Parameters
@@ -60,25 +65,30 @@ def debug_frame(size, obj_uid, link_index):
     link_index : int
         Index of the link on the body to attach the frame to. Use `-1` for the
         base link.
+    Returns
+    -------
+    :
+        tuple[int] : pybullet ids of the lines
     """
-    pyb.addUserDebugLine(
+    l1 = pyb.addUserDebugLine(
         [0, 0, 0],
         [size, 0, 0],
         lineColorRGB=[1, 0, 0],
         parentObjectUniqueId=obj_uid,
         parentLinkIndex=link_index,
     )
-    pyb.addUserDebugLine(
+    l2 = pyb.addUserDebugLine(
         [0, 0, 0],
         [0, size, 0],
         lineColorRGB=[0, 1, 0],
         parentObjectUniqueId=obj_uid,
         parentLinkIndex=link_index,
     )
-    pyb.addUserDebugLine(
+    l3 = pyb.addUserDebugLine(
         [0, 0, 0],
         [0, 0, size],
         lineColorRGB=[0, 0, 1],
         parentObjectUniqueId=obj_uid,
         parentLinkIndex=link_index,
     )
+    return l1, l2, l3
