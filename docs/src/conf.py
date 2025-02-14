@@ -21,11 +21,11 @@
 # -- Project information -----------------------------------------------------
 
 project = 'pyb_utils'
-copyright = '2023, Adam Heins'
+copyright = '2025, Adam Heins'
 author = 'Adam Heins'
 
 # The short X.Y version
-version = '2.2.1'
+version = '2.3.0'
 # The full version, including alpha/beta/rc tags
 release = version
 
