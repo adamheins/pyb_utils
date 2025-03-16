@@ -1,13 +1,13 @@
 [project]
 name = "pyb_utils"
-version = "2.3.0"
+version = "2.3.1"
 description = "Basic utilities for PyBullet, including collision detection, ghost (i.e. visual-only) objects, and cameras."
 authors = [
   {name = "Adam Heins", email = "mail@adamheins.com"}
 ]
 license = { text = "MIT" }
 readme = "README.md"
-requires-python = ">=3.8,<3.13"
+requires-python = ">=3.8"
 dependencies = [
   "numpy>=1.24.0",
   "scipy>=1.10.0",
@@ -24,11 +24,8 @@ dev = [
 ]
 
 [build-system]
-requires = ["setuptools>=42"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-include = ["pyb_utils"]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.black]
 line-length = 80
