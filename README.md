@@ -163,9 +163,25 @@ problem. Currently known issues:
   Use `GhostObject.sphere` instead.
 
 ## Development
-* Run `tox` to run the tests.
-* Sphinx is used to build the documentation. With Sphinx installed, run `make
-  html` in the `docs` directory.
+
+[uv](https://docs.astral.sh/uv/) is used for managing dependencies, testing,
+building, and publishing. Create a virtual environment for the project:
+```
+uv venv
+uv sync --dev
+```
+Run the tests:
+```
+uv run pytest
+```
+Run the tests for various Python versions:
+```
+# for example, test with Python 3.8 (in an isolated environment)
+uv run --locked --isolated --python=3.8 pytest
+```
+
+Sphinx is used to build the documentation. With Sphinx installed, run `make
+html` in the `docs` directory.
 
 ## License
 [MIT](https://github.com/adamheins/pyb_utils/blob/main/LICENSE)
