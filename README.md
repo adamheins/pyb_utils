@@ -46,7 +46,12 @@ python -m pip install .
 The project's documentation is available [here](https://pyb-utils.readthedocs.io).
 
 ## Usage and examples
-This package provides a few basic quality-of-life utilities. First, PyBullet
+
+This package provides a few basic quality-of-life utilities.
+
+### Quaternions
+
+First, PyBullet
 represents rotations using quaternions (in `[x, y, z, w]` order). We provide a
 few helper routines to create quaternions about the principal axes, convert
 quaternions to rotation matrices, and to rotate points (using
@@ -70,6 +75,8 @@ array([0, 0, 1, 0])                      # 180 deg rotate about z
 array([0, 1, 0])
 ```
 
+### Rigid bodies
+
 Second, we provide a simple class to quickly create rigid bodies
 programmatically, which is useful for adding basic objects to manipulate or act
 as obstacles:
@@ -88,6 +95,8 @@ as obstacles:
 # now put it somewhere else
 >>> ball.set_pose(position=[2, 0, 0.5])
 ```
+
+### Named tuples
 
 Third, we wrap some PyBullet functions to return *named* tuples, rather than
 normal tuples. When the tuples have 10+ fields in them, it is rather helpful to
@@ -130,6 +139,15 @@ The second difference is that in pyb_utils `getLinkState(s)` will always return
 `computeLinkVelocity=False`, then `worldLinkLinearVelocity` and
 `worldLinkAngularVelocity` are both set to `None`.
 
+### Load a URDF from a string
+
+PyBullet can only load URDFs from files, using `pybullet.loadURDF`. We provide
+the alternative function `pyb_utils.load_urdf_from_string` to load a URDF
+directly from a string. The optional keyword arguments are all the same as
+`loadURDF`.
+
+### More
+
 And there's more! You can find example scripts of all of this package's
 utilities in the `examples/` directory:
 
@@ -139,6 +157,7 @@ utilities in the `examples/` directory:
 * [ghost objects](examples/ghost_object_example.py)
 * [named tuples](examples/named_tuples_example.py)
 * [video](examples/video_example.py)
+* [robot control](examples/robot_control_example.py)
 
 ## Video Output
 Writing a video with the `VideoRecorder` defaults to using the `mp4v` codec,

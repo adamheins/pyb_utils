@@ -33,4 +33,4 @@ from .named_tuples import (
     getLinkStates,
 )
 from .robots import Robot
-from .utils import get_urdf_path
+from .utils import get_urdf_path, load_urdf_from_string
