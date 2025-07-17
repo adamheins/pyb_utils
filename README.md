@@ -13,6 +13,7 @@ including:
 * Versions of some PyBullet functions that return *named* tuples, for easy
   field access.
 * Basic quaternion functions.
+* Load a URDF directly from a string.
 
 ## Install and run
 This package requires at least **Python 3.8**. It has been tested on Ubuntu
