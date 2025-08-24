@@ -160,6 +160,24 @@ utilities in the `examples/` directory:
 * [video](examples/video_example.py)
 * [robot control](examples/robot_control_example.py)
 
+## URDF Viewer
+
+pyb_utils includes a simple URDF viewer. On the command line, run:
+```
+pybview <urdf_file>
+```
+which loads the given URDF file in PyBullet for visualization and prints
+information about its links and joints.
+
+To install `pybview` as a standalone executable on your system, it is
+recommended to use either [uv](https://docs.astral.sh/uv/) or
+[pipx](https://pipx.pypa.io/):
+```
+uv tool install pyb_utils
+# or
+pipx install pyb_utils
+```
+
 ## Video Output
 Writing a video with the `VideoRecorder` defaults to using the `mp4v` codec,
 which is widely supported but (at least on my computer running Ubuntu 20.04)
