@@ -34,3 +34,4 @@ from .named_tuples import (
 )
 from .robots import Robot
 from .utils import get_urdf_path, load_urdf_from_string
+from .version import __version__

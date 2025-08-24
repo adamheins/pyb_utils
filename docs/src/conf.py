@@ -16,16 +16,19 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('../pyb_utils'))
 # print(os.path.abspath('../../pyb_utils'))
+import datetime
+import pyb_utils
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'pyb_utils'
-copyright = '2025, Adam Heins'
+year = datetime.datetime.now().year
 author = 'Adam Heins'
+copyright = f'{year}, {author}'
 
 # The short X.Y version
-version = '2.3.1'
+version = pyb_utils.__version__
 # The full version, including alpha/beta/rc tags
 release = version
 
