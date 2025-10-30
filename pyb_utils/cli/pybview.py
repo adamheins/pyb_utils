@@ -1,9 +1,11 @@
 """A simple viewer for URDF files using PyBullet."""
+
 import argparse
 import math
 import time
 import sys
 
+import colorama
 import numpy as np
 import pybullet as pyb
 import pyb_utils
@@ -17,6 +19,11 @@ JOINT_TYPE_NAMES = {
     pyb.JOINT_PLANAR: "planar",
     pyb.JOINT_FIXED: "fixed",
 }
+
+
+def hl(s, color):
+    """Colour a string for terminal output."""
+    return color + str(s) + colorama.Fore.RESET
 
 
 def main():
@@ -75,15 +82,22 @@ def main():
     for i in range(robot.num_total_joints):
         info = pyb_utils.getJointInfo(uid, i, decode="utf-8")
         joint_type = JOINT_TYPE_NAMES[info.jointType]
-        joint_info.append(f"{info.jointName} ({joint_type})")
+        if info.jointType == pyb.JOINT_FIXED:
+            joint_info.append(f"{info.jointName} ({joint_type})")
+        else:
+            joint_info.append(
+                f"{info.jointName} ({hl(joint_type, color=colorama.Fore.GREEN)})"
+            )
 
-    print(f"\nLoaded URDF: {args.urdf_file}")
+    print(f"\nLoaded URDF: {hl(args.urdf_file, color=colorama.Fore.YELLOW)}")
     print(f"q = {q}")
-    print(f"Total joints: {robot.num_total_joints}")
-    print(f"Moveable joints: {robot.num_moveable_joints}")
-    print(f"Joints: {', '.join(joint_info)}")
-    print(f"Links: {', '.join(robot.link_names)}")
-    print(f"Press Ctrl-C to quit.\n")
+    print(
+        f"Joints (total: {robot.num_total_joints}, moveable: {hl(robot.num_moveable_joints, color=colorama.Fore.GREEN)}):"
+    )
+    print("  " + "\n  ".join(joint_info))
+    print("Links:")
+    print("  " + "\n  ".join(robot.link_names))
+    print(f"Press Ctrl-C to quit.")
 
     try:
         qd = q.copy()
