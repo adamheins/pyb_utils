@@ -25,20 +25,9 @@ pip install pyb_utils
 ```
 
 ### From source
-Clone the repository:
 ```bash
 git clone https://github.com/adamheins/pyb_utils
 cd pyb_utils
-```
-
-Install using [poetry](https://python-poetry.org/):
-```bash
-poetry install
-poetry run python examples/collision_detection_example.py  # for example
-```
-
-Or using pip:
-```bash
 python -m pip install .
 ```
 
