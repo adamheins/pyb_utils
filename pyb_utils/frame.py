@@ -1,4 +1,5 @@
 """This modules provides visible oriented frames for debugging the simulation."""
+
 from typing import Iterable, Tuple
 
 import pybullet as pyb
@@ -54,7 +55,9 @@ def debug_frame_world(
     return l1, l2, l3
 
 
-def debug_frame(size: float, obj_uid: int, link_index: int) -> Tuple[int]:
+def debug_frame(
+    size: float, obj_uid: int, link_index: int, line_width: int = 1
+) -> Tuple[int]:
     """Attach a frame to a link for debugging purposes.
 
     Parameters
@@ -77,6 +80,7 @@ def debug_frame(size: float, obj_uid: int, link_index: int) -> Tuple[int]:
         lineColorRGB=[1, 0, 0],
         parentObjectUniqueId=obj_uid,
         parentLinkIndex=link_index,
+        lineWidth=line_width,
     )
     l2 = pyb.addUserDebugLine(
         [0, 0, 0],
@@ -84,6 +88,7 @@ def debug_frame(size: float, obj_uid: int, link_index: int) -> Tuple[int]:
         lineColorRGB=[0, 1, 0],
         parentObjectUniqueId=obj_uid,
         parentLinkIndex=link_index,
+        lineWidth=line_width,
     )
     l3 = pyb.addUserDebugLine(
         [0, 0, 0],
@@ -91,5 +96,6 @@ def debug_frame(size: float, obj_uid: int, link_index: int) -> Tuple[int]:
         lineColorRGB=[0, 0, 1],
         parentObjectUniqueId=obj_uid,
         parentLinkIndex=link_index,
+        lineWidth=line_width,
     )
     return l1, l2, l3

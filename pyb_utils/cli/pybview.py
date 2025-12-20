@@ -52,6 +52,14 @@ def main():
         action="store_true",
         help="Turn off joint brakes (disable joint friction).",
     )
+    parser.add_argument(
+        "--mass", action="store_true", help="Print link masses."
+    )
+    parser.add_argument(
+        "--com",
+        action="store_true",
+        help="Place frame markers at each link's center of mass.",
+    )
     args = parser.parse_args()
 
     pyb.connect(pyb.GUI)
@@ -86,8 +94,26 @@ def main():
             joint_info.append(f"{info.jointName} ({joint_type})")
         else:
             joint_info.append(
-                f"{info.jointName} ({hl(joint_type, color=colorama.Fore.GREEN)})"
+                hl(
+                    f"{info.jointName} ({joint_type})",
+                    color=colorama.Fore.GREEN,
+                )
             )
+
+    total_mass = 0
+    link_info = []
+    for link in robot.link_names:
+        idx = robot.get_link_index(link)
+        info = pyb_utils.getDynamicsInfo(uid, idx)
+        total_mass += info.mass
+        if args.mass:
+            link_info.append(f"{link} (mass={info.mass:.3f})")
+        else:
+            link_info.append(link)
+
+        # add frame at the link CoM
+        if args.com:
+            pyb_utils.debug_frame(0.05, uid, idx, line_width=3)
 
     print(f"\nLoaded URDF: {hl(args.urdf_file, color=colorama.Fore.YELLOW)}")
     print(f"q = {q}")
@@ -95,8 +121,15 @@ def main():
         f"Joints (total: {robot.num_total_joints}, moveable: {hl(robot.num_moveable_joints, color=colorama.Fore.GREEN)}):"
     )
     print("  " + "\n  ".join(joint_info))
-    print("Links:")
-    print("  " + "\n  ".join(robot.link_names))
+    if args.mass:
+        print(f"Links (mass={total_mass:.3f}):")
+    else:
+        print("Links:")
+    print("  " + "\n  ".join(link_info))
+    if args.com:
+        print(
+            "Press 'w' in the GUI to enter wireframe mode to more easily see CoM frames."
+        )
     print(f"Press Ctrl-C to quit.")
 
     try:
