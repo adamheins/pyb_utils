@@ -156,7 +156,9 @@ pyb_utils includes a simple URDF viewer. On the command line, run:
 pybview <urdf_file>
 ```
 which loads the given URDF file in PyBullet for visualization and prints
-information about its links and joints.
+information about its links and joints. Use the `-q` option to specify a
+different joint configuration; use `-h` for more details and to see more
+options.
 
 To install `pybview` as a standalone executable on your system, it is
 recommended to use either [uv](https://docs.astral.sh/uv/) or
