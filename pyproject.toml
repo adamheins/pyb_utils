@@ -1,6 +1,6 @@
 [project]
 name = "pyb_utils"
-version = "2.4.1"
+version = "2.4.2"
 description = "Basic utilities for PyBullet, including collision detection, ghost (i.e. visual-only) objects, and cameras."
 authors = [
   {name = "Adam Heins", email = "mail@adamheins.com"}
