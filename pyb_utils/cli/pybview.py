@@ -60,6 +60,9 @@ def main():
         action="store_true",
         help="Place frame markers at each link's center of mass.",
     )
+    parser.add_argument(
+        "-V", "--version", action="version", version=pyb_utils.__version__
+    )
     args = parser.parse_args()
 
     pyb.connect(pyb.GUI)
