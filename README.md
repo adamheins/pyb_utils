@@ -14,6 +14,7 @@ including:
   field access.
 * Basic quaternion functions.
 * Load a URDF directly from a string.
+* A simple PyBullet-based [URDF viewer](#urdf-viewer).
 
 ## Install and run
 This package requires at least **Python 3.8**. It has been tested on Ubuntu
